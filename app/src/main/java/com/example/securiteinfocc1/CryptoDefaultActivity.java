@@ -44,6 +44,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
 
 
+
+
     }
 
     public void chiffreDechiffre(){
@@ -57,7 +59,10 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
                     messageChiffre.setText(Crypto.atbash(messageClair.getText().toString()));
 
+                /*César 3*/
+                case 1 :
 
+                    messageChiffre.setText(Crypto.cesar(messageClair.getText().toString() , chiffre));
 
 
             }

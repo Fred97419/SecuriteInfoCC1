@@ -22,12 +22,21 @@ public class ExtendedAscii {
 
 
 
-    public static final char getChar(int code){
+    public static final char getChar(int code , int offset){
 
         if (code >= 0x80 && code <= 0xFF) {
-            return EXTENDED[code - 0x7F];
+            for (int i = 0 ; i< EXTENDED.length ; i++){
+
+                if ((char) code == (char) EXTENDED[i]) {
+
+                    int next = i+offset;
+                    return EXTENDED[next];
+
+                }
+
+            }
         }
-        return (char) code;
+        return (char) (code + offset);
 
     }
 
