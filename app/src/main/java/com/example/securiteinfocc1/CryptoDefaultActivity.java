@@ -43,11 +43,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
         if (chiffrementID ==0 || chiffrementID == 1) cleEdit.setVisibility(View.INVISIBLE); //cache le bouton clé pour Atbash et César
 
 
-        char[][] test = Crypto.cleToPolybe("TEST1");
 
-        Crypto.showPolybe(test);
-
-
+        Log.println(Log.ASSERT , "RESULTAT PLAYFAIR" , Crypto.playfair("TC" , "ATOL" , false));
 
 
     }
