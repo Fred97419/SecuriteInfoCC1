@@ -2,9 +2,12 @@ package com.example.securiteinfocc1;
 
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 
 public class Crypto {
+
+    //------------------------[FONCTIONS APPELÉES PAR L'ACTIVITÉ]-----------------------------------
 
     /**
      * [Substitution]
@@ -114,7 +117,249 @@ public class Crypto {
 
     }
 
+
+    /**
+     * Chiffrage homophone utilisant un carré de Polybe
+     *
+     * @param message à chiffrer/déchiffrer
+     * @param cle cle transformée en carré de polybe 6x6
+     * @param chiffre vrai pour chiffrer, faux pour déchiffrer
+     * @return
+     */
+    public static final String homophonePolybe(String message , String cle , boolean chiffre){
+
+        String resultat ="";
+
+        String message_upper = message.toUpperCase();
+
+        char[][] carrePolybe = cleToPolybe(cle);
+
+
+
+
+        return "";
+
+    }
+
     //----------------------------------------------------------------------------------------------
+
+    /**
+     *
+     * Chiffrement de Playfair, on prendre un carré de polybe puis on inverse celui-ci
+     * en le lisant de haut en bas. On va ensuite échanger chaque paire de lettres du message
+     * ce qui va créer le message chiffré.
+     *
+     * @param message à chiffrer/déchiffrer
+     * @param cle ici un String transformé en chiffre de Playfair
+     * @param chiffre Vrai pour chiffrer, Faux pour déchiffrer
+     * @return
+     */
+    public static final String playfair (String message , String cle , boolean chiffre){
+
+        String message_uper = message.toUpperCase();
+
+        String result ="";
+
+        char[][] carrePolybe = cleToPolybe(cle);
+        char[][] chiffrePlayfair = polybeToPlayfair(carrePolybe);
+
+
+
+        //enleve les espaces et caractères spéciaux
+        String message_only = deleteNoLettersAndNumbers(message_uper);
+
+        if(message_only.length()%2 !=0) message_only+='X';
+
+        //vérifie si un couple de lettre ne contient pas la même lettre, si oui rajoute une lettre entre
+
+        //objet Java qui nous permet d'insérer où l'on souhaite un caractère
+        StringBuffer stringbuffer = new StringBuffer(message_only);
+
+        for (int i=0 ; i<message_only.length()-2 ; i+=2) {
+
+            if (message_only.charAt(i) == message_only.charAt(i + 1)) {
+
+                stringbuffer.insert(i+1 , 'Q');
+
+            }
+        }
+
+
+        String message_ok = stringbuffer.toString();
+
+        if(message_ok.length()%2 !=0) message_ok+='X';
+
+        Log.println(Log.ASSERT , "PLAYFAIR A CODER:" , message_ok);
+
+        Log.println(Log.ASSERT , "CHIFFRE PLAYFAIR -> " , "------------");
+        showPolybe(chiffrePlayfair);
+
+
+        /* Traitement des couples de lettres */
+
+            String coupleLettre;
+            for (int i=0 ; i<message_ok.length() ; i+=2) {
+
+                coupleLettre="";
+
+                coupleLettre += message_ok.charAt(i);
+                coupleLettre += message_ok.charAt(i+1);
+
+                Log.println(Log.ASSERT , "PLAYFAIR -> COUPLE : "+i , coupleLettre );
+
+
+                int[] coordLettre0 = letterCoordInPlayfair(coupleLettre.charAt(0), chiffrePlayfair);
+                int[] coordLettre1 = letterCoordInPlayfair(coupleLettre.charAt(1), chiffrePlayfair);
+
+
+                    //si les deux lettres sont sur des lignes et des colonnes différentes
+                    if (coordLettre0[0] != coordLettre1[0] && coordLettre0[1] != coordLettre1[1]) {
+
+                        result += chiffrePlayfair[coordLettre0[0]][coordLettre1[1]];
+                        result += chiffrePlayfair[coordLettre1[0]][coordLettre0[1]];
+
+                    }
+
+                    /*On chiffre le message*/
+                    if(chiffre){
+
+                        //si les deux lettres sont sur les mêmes lignes
+                        if (coordLettre0[0] == coordLettre1[0]) {
+
+                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre0[1] + 1) % 6];
+                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre1[1] + 1) % 6];
+
+                        }
+
+                        //si les deux lettres sont sur les mêmes colonnes
+                        if (coordLettre0[1] == coordLettre1[1]) {
+
+                            result += chiffrePlayfair[(coordLettre0[0] + 1) % 6][coordLettre0[1]];
+                            result += chiffrePlayfair[(coordLettre1[0] + 1) % 6][coordLettre0[1]];
+
+                        }
+
+                    }
+
+                    /*On déchiffre le message*/
+                    if(!chiffre){
+
+                        //si les deux lettres sont sur les mêmes lignes
+                        if (coordLettre0[0] == coordLettre1[0]) {
+
+                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre0[1] - 1) % 6];
+                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre1[1] - 1) % 6];
+
+                        }
+
+                        //si les deux lettres sont sur les mêmes colonnes
+                        if (coordLettre0[1] == coordLettre1[1]) {
+
+                            //evite que l'indice soit négatif (le modulo en java ne gérant pas les nombres négatifs comme python)
+                            int colonne0 = (coordLettre0[0] -1);
+                            int colonne1 = (coordLettre1[0] -1);
+
+                            if(colonne0 < 0) colonne0 = 6+colonne0;
+                            if(colonne1 < 0) colonne1 = 6+colonne1;
+
+                            result += chiffrePlayfair[colonne0][coordLettre0[1]];
+                            result += chiffrePlayfair[colonne1][coordLettre0[1]];
+
+                        }
+
+                    }
+            }
+
+        /*Gestion caractères spéciaux et espace */
+
+        StringBuffer result_string_buffer = new StringBuffer(result);
+
+        // rajoute le caractère spécial ou l'espace dans la chaine resultat à l'indice où il le trouve dans le message d'origine
+        for (int i=0 ; i<message_uper.length() ; i++){
+
+            if( ! isALetterOrNumber(message_uper.charAt(i))) result_string_buffer.insert(i , message_uper.charAt(i));
+
+        }
+
+        String result_final = result_string_buffer.toString();
+
+
+        return result_final;
+
+    }
+
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     *
+     * @param message message à chiffrer/déchiffrer
+     * @param cle ici une matrice 2X2 d'int servant au chiffrage déchiffrage
+     * @param chiffre Vrai pour chiffrer, Faux pour déchiffrer
+     * @return
+     */
+    public static final String hill(String message , int[][] cle , boolean chiffre){
+
+        String resultat="";
+
+        if(message.length() %2 !=0) message+= '*';
+
+        //det = a*d - b*c
+        int det = (cle[0][0]*cle[1][1]) - (cle[0][1]*cle[1][0]);
+
+        if(pgcd(det , 256) != 1){
+
+            resultat="Matrice de chiffrement incorrecte";
+
+            return resultat;
+
+        }
+
+        if(!chiffre){
+
+            int[][] cle_inverse = new int[2][2];
+
+            cle_inverse[0][0] = modInverse(det,256)*(cle[1][1]);
+            cle_inverse[0][1] = modInverse(det,256)*(-(cle[0][1]));
+            cle_inverse[1][0] = modInverse(det,256)*(-(cle[1][0]));
+            cle_inverse[1][1] = modInverse(det,256)*(cle[0][0]);
+
+            cle = Arrays.copyOf(cle_inverse , cle_inverse.length);
+
+
+        }
+
+
+        /* On parcourt les blocs de deux lettres et on éffectue le produit matriciel entre la clé et le bloc */
+        String blocLettre="";
+        int x_bloc[];
+        int y_bloc[];
+        for (int i=0 ; i<message.length(); i+=2){
+
+            blocLettre="";
+            x_bloc = new int[2];
+
+            blocLettre += message.charAt(i);
+            blocLettre += message.charAt(i+1);
+
+            x_bloc[0] = ExtendedAscii.getASCIICode(blocLettre.charAt(0)); //x0
+            x_bloc[1] = ExtendedAscii.getASCIICode(blocLettre.charAt(1)); //x1
+
+
+            y_bloc = produitMatricielHill(cle , x_bloc);
+
+            resultat+= ExtendedAscii.getChar(y_bloc[0] , 0);
+            resultat+= ExtendedAscii.getChar(y_bloc[1] , 0);
+
+
+        }
+
+        return resultat;
+
+    }
+
+
+
+    //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
     /*Enleve les doublons*/
     private static final String deleteDoublons(String s) {
@@ -255,6 +500,7 @@ public class Crypto {
         return resultat;
     }
 
+    //vérifie si le caractère est une lettre ou un chiffre
     private static final boolean isALetterOrNumber(char c){
 
         if( (c >='A' && c <= 'Z') || (c>='0' && c<='9')) return true;
@@ -267,6 +513,7 @@ public class Crypto {
 
     }
 
+    //enlève les caractères qui ne sont pas des lettres ou des chiffres
     private static final String deleteNoLettersAndNumbers(String s){
 
         String result="";
@@ -280,6 +527,7 @@ public class Crypto {
         return result;
     }
 
+    //donne les coordonnées (x,y) d'un caractère dans un carré de polybe ou chiffre de playfair
     private static final int[] letterCoordInPlayfair(char l , char[][] playfair){
 
         int[] resultat = new int[2];
@@ -302,180 +550,66 @@ public class Crypto {
 
     }
 
-    /**
-     * Chiffrage homophone utilisant un carré de Polybe
-     *
-     * @param message à chiffrer/déchiffrer
-     * @param cle cle transformée en carré de polybe 6x6
-     * @param chiffre vrai pour chiffrer, faux pour déchiffrer
-     * @return
-     */
-    public static final String homophonePolybe(String message , String cle , boolean chiffre){
+    // donne l'inverse de a modulo m
+    private static int modInverse(int a, int m){
 
-        String resultat ="";
+        int m0 = m;
+        int y = 0, x = 1;
 
-        String message_upper = message.toUpperCase();
+        if (m == 1)
+            return 0;
 
-        char[][] carrePolybe = cleToPolybe(cle);
+        while (a > 1)
+        {
+            //quotient
+            int q = a / m;
+
+            int t = m;
+
+            // m reste
+            // Algo d'euclide etendue
+            m = a % m;
+            a = t;
+            t = y;
+
+            // Update x and y
+            y = x - q * y;
+            x = t;
+        }
+
+        //Evite les valeurs négatives
+        if (x < 0)
+            x += m0;
+
+        return x;
+    }
+
+    //fait le produit matrice entre une matrice 2x2 et un bloc 1X2 et renvoyant le resultat modulo 256
+    private static int[] produitMatricielHill(int[][] cle , int[] x){
+
+        int[] y = new int[2];
+
+        y[0] = ((cle[0][0]*x[0]) + (cle[0][1]*x[1])) %256 ;
+        y[1] = ((cle[1][0]*x[0]) + (cle[1][1]*x[1])) %256 ;
 
 
+        return y;
 
+    }
 
-        return "";
-
+    private static int pgcd (int m,int n)
+    {
+        int r=0;
+        while(n!=0)
+        {
+            r=m%n;
+            m=n;
+            n=r;
+        }
+        return m;
     }
 
     //----------------------------------------------------------------------------------------------
-
-    /**
-     *
-     * !NOTE! : A faire -> Gérer la gestion des espaces et autres caractères dans le message de sortie
-     *
-     * Chiffrement de Playfair, on prendre un carré de polybe puis on inverse celui-ci
-     * en le lisant de haut en bas. On va ensuite échanger chaque paire de lettres du message
-     * ce qui va créer le message chiffré.
-     *
-     * @param message à chiffrer
-     * @param cle ici un String transformé en chiffre de Playfair
-     * @param chiffre Vrai pour chiffrer, Faux pour déchiffrer
-     * @return
-     */
-    public static final String playfair (String message , String cle , boolean chiffre){
-
-        String message_uper = message.toUpperCase();
-
-        String result ="";
-
-        char[][] carrePolybe = cleToPolybe(cle);
-        char[][] chiffrePlayfair = polybeToPlayfair(carrePolybe);
-
-
-
-        //enleve les espaces et caractères spéciaux
-        String message_only = deleteNoLettersAndNumbers(message_uper);
-
-        if(message_only.length()%2 !=0) message_only+='X';
-
-        //vérifie si un couple de lettre ne contient pas la même lettre, si oui rajoute une lettre entre
-
-        //objet Java qui nous permet d'insérer où l'on souhaite un caractère
-        StringBuffer stringbuffer = new StringBuffer(message_only);
-
-        for (int i=0 ; i<message_only.length()-2 ; i+=2) {
-
-            if (message_only.charAt(i) == message_only.charAt(i + 1)) {
-
-                stringbuffer.insert(i+1 , 'Q');
-
-            }
-        }
-
-
-        String message_ok = stringbuffer.toString();
-
-        if(message_ok.length()%2 !=0) message_ok+='X';
-
-        Log.println(Log.ASSERT , "PLAYFAIR A CODER:" , message_ok);
-
-        Log.println(Log.ASSERT , "CHIFFRE PLAYFAIR -> " , "------------");
-        showPolybe(chiffrePlayfair);
-
-
-        /* Traitement des couples de lettres */
-
-            String coupleLettre;
-            for (int i=0 ; i<message_ok.length() ; i+=2) {
-
-                coupleLettre="";
-
-                coupleLettre += message_ok.charAt(i);
-                coupleLettre += message_ok.charAt(i+1);
-
-                Log.println(Log.ASSERT , "PLAYFAIR -> COUPLE : "+i , coupleLettre );
-
-
-                int[] coordLettre0 = letterCoordInPlayfair(coupleLettre.charAt(0), chiffrePlayfair);
-                int[] coordLettre1 = letterCoordInPlayfair(coupleLettre.charAt(1), chiffrePlayfair);
-
-
-                    //si les deux lettres sont sur des lignes et des colonnes différentes
-                    if (coordLettre0[0] != coordLettre1[0] && coordLettre0[1] != coordLettre1[1]) {
-
-                        result += chiffrePlayfair[coordLettre0[0]][coordLettre1[1]];
-                        result += chiffrePlayfair[coordLettre1[0]][coordLettre0[1]];
-
-                    }
-
-                    /*On chiffre le message*/
-                    if(chiffre){
-
-                        //si les deux lettres sont sur les mêmes lignes
-                        if (coordLettre0[0] == coordLettre1[0]) {
-
-                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre0[1] + 1) % 6];
-                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre1[1] + 1) % 6];
-
-                        }
-
-                        //si les deux lettres sont sur les mêmes colonnes
-                        if (coordLettre0[1] == coordLettre1[1]) {
-
-                            result += chiffrePlayfair[(coordLettre0[0] + 1) % 6][coordLettre0[1]];
-                            result += chiffrePlayfair[(coordLettre1[0] + 1) % 6][coordLettre0[1]];
-
-                        }
-
-                    }
-
-                    /*On déchiffre le message*/
-                    if(!chiffre){
-
-                        //si les deux lettres sont sur les mêmes lignes
-                        if (coordLettre0[0] == coordLettre1[0]) {
-
-                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre0[1] - 1) % 6];
-                            result += chiffrePlayfair[coordLettre0[0]][(coordLettre1[1] - 1) % 6];
-
-                        }
-
-                        //si les deux lettres sont sur les mêmes colonnes
-                        if (coordLettre0[1] == coordLettre1[1]) {
-
-                            //evite que l'indice soit négatif (le modulo en java ne gérant pas les nombres négatifs comme python)
-                            int colonne0 = (coordLettre0[0] -1);
-                            int colonne1 = (coordLettre1[0] -1);
-
-                            if(colonne0 < 0) colonne0 = 6+colonne0;
-                            if(colonne1 < 0) colonne1 = 6+colonne1;
-
-                            result += chiffrePlayfair[colonne0][coordLettre0[1]];
-                            result += chiffrePlayfair[colonne1][coordLettre0[1]];
-
-                        }
-
-                    }
-            }
-
-        /*Gestion caractères spéciaux et espace */
-
-        StringBuffer result_string_buffer = new StringBuffer(result);
-
-        // rajoute le caractère spécial ou l'espace dans la chaine resultat à l'indice où il le trouve dans le message d'origine
-        for (int i=0 ; i<message_uper.length() ; i++){
-
-            if( ! isALetterOrNumber(message_uper.charAt(i))) result_string_buffer.insert(i , message_uper.charAt(i));
-
-        }
-
-        String result_final = result_string_buffer.toString();
-
-
-        return result_final;
-
-    }
-
-
-
 
 
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 
 public class CryptoDefaultActivity extends AppCompatActivity {
@@ -14,6 +15,12 @@ public class CryptoDefaultActivity extends AppCompatActivity {
     EditText cleEdit;
     EditText messageClairEdit;
     EditText messageChiffreEdit;
+
+    TextView texteCleHill;
+    EditText cle_hill_a;
+    EditText cle_hill_b;
+    EditText cle_hill_c;
+    EditText cle_hill_d;
 
     int chiffrementID;
     String chiffrementName;
@@ -33,6 +40,13 @@ public class CryptoDefaultActivity extends AppCompatActivity {
        messageClairEdit = findViewById(R.id.message_clair);
        messageChiffreEdit = findViewById(R.id.message_chiffre);
 
+
+       texteCleHill = findViewById(R.id.text_cle_hill);
+       cle_hill_a = findViewById(R.id.cle_hill_a);
+       cle_hill_b = findViewById(R.id.cle_hill_b);
+       cle_hill_c = findViewById(R.id.cle_hill_c);
+       cle_hill_d = findViewById(R.id.cle_hill_d);
+
         chiffrementID = getIntent().getIntExtra("chiffrementType" , 0);
         chiffrementName = getIntent().getStringExtra("chiffrementName" );
 
@@ -42,11 +56,18 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if (chiffrementID ==0 || chiffrementID == 1) cleEdit.setVisibility(View.INVISIBLE); //cache le bouton clé pour Atbash et César
 
+        /* Affiche la clé sous forme de quatre nombres pour Hill*/
+        if(chiffrementID != 5){
 
+            texteCleHill.setVisibility(View.INVISIBLE);
+            cle_hill_a.setVisibility(View.INVISIBLE);
+            cle_hill_b.setVisibility(View.INVISIBLE);
+            cle_hill_c.setVisibility(View.INVISIBLE);
+            cle_hill_d.setVisibility(View.INVISIBLE);
+        }
 
-        Log.println(Log.ASSERT , "RESULTAT PLAYFAIR" , Crypto.playfair("TC" , "ATOL" , false));
+        if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-        Log.println(Log.ASSERT , "test modulo ---->" , Integer.toString(6 + (-1)));
 
 
     }
@@ -78,7 +99,25 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 case 4:
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.playfair(message,cle,chiffre));
 
+
+                case 5:
+                    String a = cle_hill_a.getText().toString();
+                    String b = cle_hill_b.getText().toString();
+                    String c = cle_hill_c.getText().toString();
+                    String d = cle_hill_d.getText().toString();
+
+                    if(!(a.isEmpty() || b.isEmpty() || c.isEmpty() || d.isEmpty())){
+
+                        int[][] cleHill = {{Integer.parseInt(a),Integer.parseInt(b)},{Integer.parseInt(c),Integer.parseInt(d)}};
+
+                        messageChiffreEdit.setText(Crypto.hill(message , cleHill , chiffre));
+
+                    }
+
                 }
+
+
+
 
 
 

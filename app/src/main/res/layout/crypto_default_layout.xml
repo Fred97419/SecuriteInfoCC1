@@ -45,11 +45,11 @@
         android:id="@+id/chiffre"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="17dp"
-        android:layout_marginLeft="17dp"
-        android:layout_marginTop="181dp"
-        android:text="Chiffrer"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="268dp"
         android:onClick="chiffre"
+        android:text="Chiffrer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/message_chiffre" />
 
@@ -59,9 +59,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="181dp"
-        android:text="Déchiffrer"
+        android:layout_marginTop="268dp"
         android:onClick="dechiffre"
+        android:text="Déchiffrer"
         app:layout_constraintStart_toEndOf="@+id/chiffre"
         app:layout_constraintTop_toBottomOf="@+id/message_chiffre" />
 
@@ -69,13 +69,78 @@
         android:id="@+id/retour"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="181dp"
-        android:layout_marginEnd="21dp"
-        android:layout_marginRight="21dp"
-        android:text="Retour"
+        android:layout_marginTop="268dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
         android:onClick="retour"
+        android:text="Retour"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/message_chiffre" />
+
+    <EditText
+        android:id="@+id/cle_hill_b"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="164dp"
+        android:layout_marginRight="164dp"
+        android:ems="10"
+        android:hint="b"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cle" />
+
+    <EditText
+        android:id="@+id/cle_hill_c"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginLeft="124dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="c"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cle_hill_a" />
+
+    <EditText
+        android:id="@+id/cle_hill_d"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="164dp"
+        android:layout_marginRight="164dp"
+        android:ems="10"
+        android:hint="d"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cle_hill_b" />
+
+    <EditText
+        android:id="@+id/cle_hill_a"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginLeft="124dp"
+        android:layout_marginTop="36dp"
+        android:ems="10"
+        android:hint="a"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cle" />
+
+    <TextView
+        android:id="@+id/text_cle_hill"
+        android:layout_width="66dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginLeft="38dp"
+        android:layout_marginTop="79dp"
+        android:gravity="center"
+        android:text="Clé : "
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cle" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
