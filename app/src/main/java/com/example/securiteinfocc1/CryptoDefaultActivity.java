@@ -46,6 +46,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         Log.println(Log.ASSERT , "RESULTAT PLAYFAIR" , Crypto.playfair("TC" , "ATOL" , false));
 
+        Log.println(Log.ASSERT , "test modulo ---->" , Integer.toString(6 + (-1)));
+
 
     }
 
@@ -72,9 +74,14 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.vigenere(message , cle , chiffre));
 
-
+                /*Playfair*/
+                case 4:
+                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.playfair(message,cle,chiffre));
 
                 }
+
+
+
 
 
 

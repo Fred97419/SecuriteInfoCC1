@@ -143,7 +143,7 @@ public class Crypto {
     }
 
     /*Transforme la cle en carré de polybe*/
-    public static final char[][] cleToPolybe (String cleTempo) {
+    private static final char[][] cleToPolybe (String cleTempo) {
 
         String cle_upper = cleTempo.toUpperCase();
         String cle = deleteDoublons(cle_upper);
@@ -236,7 +236,7 @@ public class Crypto {
     }
 
     /*Transforme le carré de polybe en chiffre de playfair*/
-    public static final char[][] polybeToPlayfair (char[][] polybe){
+    private static final char[][] polybeToPlayfair (char[][] polybe){
 
         char[][] resultat = new char[6][6];
 
@@ -255,7 +255,17 @@ public class Crypto {
         return resultat;
     }
 
+    private static final boolean isALetterOrNumber(char c){
 
+        if( (c >='A' && c <= 'Z') || (c>='0' && c<='9')) return true;
+
+        else {
+
+            return false;
+        }
+
+
+    }
 
     private static final String deleteNoLettersAndNumbers(String s){
 
@@ -263,7 +273,7 @@ public class Crypto {
 
         for (int i=0 ; i< s.length() ; i++){
 
-            if( (s.charAt(i) >='A' && s.charAt(i) <= 'Z') || (s.charAt(i)>='0' && s.charAt(i)<='9')) result+=s.charAt(i);
+            if( (isALetterOrNumber(s.charAt(i)))) result+=s.charAt(i);
 
 
         }
@@ -431,17 +441,36 @@ public class Crypto {
                         //si les deux lettres sont sur les mêmes colonnes
                         if (coordLettre0[1] == coordLettre1[1]) {
 
-                            result += chiffrePlayfair[(coordLettre0[0] - 1) % 6][coordLettre0[1]];
-                            result += chiffrePlayfair[(coordLettre1[0] - 1) % 6][coordLettre0[1]];
+                            //evite que l'indice soit négatif (le modulo en java ne gérant pas les nombres négatifs comme python)
+                            int colonne0 = (coordLettre0[0] -1);
+                            int colonne1 = (coordLettre1[0] -1);
+
+                            if(colonne0 < 0) colonne0 = 6+colonne0;
+                            if(colonne1 < 0) colonne1 = 6+colonne1;
+
+                            result += chiffrePlayfair[colonne0][coordLettre0[1]];
+                            result += chiffrePlayfair[colonne1][coordLettre0[1]];
 
                         }
 
                     }
             }
 
+        /*Gestion caractères spéciaux et espace */
+
+        StringBuffer result_string_buffer = new StringBuffer(result);
+
+        // rajoute le caractère spécial ou l'espace dans la chaine resultat à l'indice où il le trouve dans le message d'origine
+        for (int i=0 ; i<message_uper.length() ; i++){
+
+            if( ! isALetterOrNumber(message_uper.charAt(i))) result_string_buffer.insert(i , message_uper.charAt(i));
+
+        }
+
+        String result_final = result_string_buffer.toString();
 
 
-        return result;
+        return result_final;
 
     }
 
