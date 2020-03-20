@@ -68,8 +68,6 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-
-
     }
 
     public void chiffreDechiffre(){
@@ -99,7 +97,7 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 case 4:
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.playfair(message,cle,chiffre));
 
-
+                /*Hill avec m=2*/
                 case 5:
                     String a = cle_hill_a.getText().toString();
                     String b = cle_hill_b.getText().toString();
@@ -113,6 +111,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                         messageChiffreEdit.setText(Crypto.hill(message , cleHill , chiffre));
 
                     }
+                /*Transposition Rectangulaire*/
+                case 6 :
+                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.transpositionRectangulaire(message , cle , chiffre));
 
                 }
 

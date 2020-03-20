@@ -3,7 +3,6 @@ package com.example.securiteinfocc1;
 import android.util.Log;
 
 import java.util.Arrays;
-import java.util.Hashtable;
 
 public class Crypto {
 
@@ -291,6 +290,12 @@ public class Crypto {
     //----------------------------------------------------------------------------------------------
 
     /**
+     * Chiffrement de Hill, on prend le message qu'on divise par bloc de deux
+     * caractères. Chaque caractère est associé à un numéro dans la table ASCII
+     * étendue. On chanque la valeur de ces numéros en faisant le produit matriciel
+     * de la clé avec les les numéros.
+     *
+     *
      *
      * @param message message à chiffrer/déchiffrer
      * @param cle ici une matrice 2X2 d'int servant au chiffrage déchiffrage
@@ -301,6 +306,7 @@ public class Crypto {
 
         String resultat="";
 
+        //Rajout d'un caractère '*' si le message n'est pas de longueur pair
         if(message.length() %2 !=0) message+= '*';
 
         //det = a*d - b*c
@@ -364,6 +370,83 @@ public class Crypto {
             resultat+= ExtendedAscii.getChar(y_bloc[0] , 0);
             resultat+= ExtendedAscii.getChar(y_bloc[1] , 0);
 
+
+        }
+
+        return resultat;
+
+    }
+
+
+    public static final String transpositionRectangulaire(String message , String cle , boolean chiffre){
+
+        String resultat ="";
+
+        int nombre_ligne = (message.length()/cle.length())+1;
+
+        char[][] tableau_chiffrage = new char[(message.length()/cle.length())+1][cle.length()];
+
+        int[] numeroTab = cleToNumeroAssocie(cle);
+
+
+        int compteur_i=0;
+        int compteur_j=0;
+
+        //remplis le reste du tableau
+        for (int i=0 ; i<message.length() ; i++){
+
+            if(compteur_j==cle.length()){
+
+                compteur_i++;
+                compteur_j=0;
+            }
+
+            tableau_chiffrage[compteur_i][compteur_j] = message.charAt(i);
+
+            compteur_j++;
+
+        }
+        /*TEST -------->*/
+        for (int i=0 ; i<nombre_ligne; i++){
+
+
+            for (int j=0 ; j<cle.length(); j++){
+
+                try{
+                    System.out.print(tableau_chiffrage[i][j]);
+                }
+                catch (Exception e){}
+
+
+            }
+
+            System.out.println("-----------------------");
+
+        }
+        /*------------------------>*/
+
+        //Chiffrage du message
+
+        Log.println(Log.ASSERT  , "tab numero -----> " , "vvvvvv");
+        showTab(numeroTab);
+
+        for (int i=0 ; i< cle.length(); i++){
+
+            int colonne_a_selectionner = indexOf(i , numeroTab);
+
+            Log.println(Log.ASSERT  , "COLONNE A SELECTIONNER" , Integer.toString(colonne_a_selectionner));
+
+            for (int j=0 ; j< (message.length()/cle.length())+1; j++){
+
+                try{
+
+
+
+                    resultat+= tableau_chiffrage[j][colonne_a_selectionner];
+
+                }catch(Exception e){}
+
+            }
 
         }
 
@@ -490,6 +573,17 @@ public class Crypto {
             System.out.println("");
 
         }
+
+
+    }
+
+    public static final void showTab(int[] t){
+
+        for (int i=0 ; i< t.length ; i++){
+
+            Log.println(Log.ASSERT , "ELEMENT TABLEAU "+i, Integer.toString(t[i]));
+        }
+
 
 
     }
@@ -640,6 +734,57 @@ public class Crypto {
             n=r;
         }
         return m;
+    }
+
+    private static boolean isInTab(int n , int[] tab){
+
+        for(int i=0 ; i<tab.length ; i++){
+
+            if (n == tab[i]) return true;
+
+        }
+        return false;
+    }
+
+    public static int[] cleToNumeroAssocie(String cle){
+
+        int[] resultat = new int[cle.length()];
+
+        for (int i=0 ; i<resultat.length ; i++){
+            resultat[i] = -1;
+        }
+
+        char[] cle_char = cle.toCharArray();
+
+        char[] cle_char_sort = cle.toCharArray();
+
+        Arrays.sort(cle_char_sort);
+
+        for (int i=0 ; i<cle_char.length ; i++){
+
+            //renvoie l'indice de l'élement cherché
+            int indice = Arrays.binarySearch(cle_char_sort , cle_char[i]);
+
+            if(isInTab(indice , resultat)) indice++;
+
+            resultat[i] = indice;
+
+        }
+
+        return resultat;
+    }
+
+    //renvoie l'indice d'un element dans un tableau de int
+    private static int indexOf(int n , int[] t){
+
+        for (int i=0 ; i<t.length ; i++){
+
+            if(t[i] == n) return i;
+
+        }
+
+        return -1;
+
     }
 
     //----------------------------------------------------------------------------------------------
