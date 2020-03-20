@@ -323,7 +323,14 @@ public class Crypto {
             cle_inverse[1][0] = modInverse(det,256)*(-(cle[1][0]));
             cle_inverse[1][1] = modInverse(det,256)*(cle[0][0]);
 
+
+
             cle = Arrays.copyOf(cle_inverse , cle_inverse.length);
+
+            Log.println(Log.ASSERT , "M-1 : a --> " , Integer.toString(cle[0][0]));
+            Log.println(Log.ASSERT , "M-1 : b --> " , Integer.toString(cle[0][1]));
+            Log.println(Log.ASSERT , "M-1 : c --> " , Integer.toString(cle[1][0]));
+            Log.println(Log.ASSERT , "M-1 : d --> " , Integer.toString(cle[1][1]));
 
 
         }
@@ -344,8 +351,15 @@ public class Crypto {
             x_bloc[0] = ExtendedAscii.getASCIICode(blocLettre.charAt(0)); //x0
             x_bloc[1] = ExtendedAscii.getASCIICode(blocLettre.charAt(1)); //x1
 
+            Log.println(Log.ASSERT , "VALEUR X0 -> " , Integer.toString(x_bloc[0]));
+            Log.println(Log.ASSERT , "VALEUR X1 -> " , Integer.toString(x_bloc[1]));
 
             y_bloc = produitMatricielHill(cle , x_bloc);
+
+            Log.println(Log.ASSERT , "VALEUR Y0 -> " , Integer.toString(y_bloc[0]));
+            Log.println(Log.ASSERT , "VALEUR Y1 -> " , Integer.toString(y_bloc[1]));
+
+
 
             resultat+= ExtendedAscii.getChar(y_bloc[0] , 0);
             resultat+= ExtendedAscii.getChar(y_bloc[1] , 0);
@@ -584,13 +598,32 @@ public class Crypto {
         return x;
     }
 
+    //modulo pouvant prendre en compte les a%b avec a<0
+    private static int mod(int a, int b)
+    {
+        int ret = a % b;
+        if (ret < 0)
+            ret += b;
+        return ret;
+    }
+
     //fait le produit matrice entre une matrice 2x2 et un bloc 1X2 et renvoyant le resultat modulo 256
     private static int[] produitMatricielHill(int[][] cle , int[] x){
 
         int[] y = new int[2];
 
-        y[0] = ((cle[0][0]*x[0]) + (cle[0][1]*x[1])) %256 ;
-        y[1] = ((cle[1][0]*x[0]) + (cle[1][1]*x[1])) %256 ;
+        int y0,y1;
+
+        y0 =((cle[0][0]*x[0]) + (cle[0][1]*x[1]));
+        y1 =((cle[1][0]*x[0]) + (cle[1][1]*x[1]));
+
+
+        //utilisation d'une fonction modulo capable de gérer les nombres négatifs (ce que Java ne fait pas)
+        y[0] = mod(y0,256);
+        y[1] = mod(y1,256);
+
+        Log.println(Log.ASSERT , "MODULO test -> " , Integer.toString(mod(-428 , 256)));
+
 
 
         return y;
