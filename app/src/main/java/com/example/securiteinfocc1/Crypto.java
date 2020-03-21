@@ -378,81 +378,132 @@ public class Crypto {
     }
 
 
-    public static final String transpositionRectangulaire(String message , String cle , boolean chiffre){
+    public static final String transpositionRectangulaire(String message , String cle , boolean chiffre) {
 
-        String resultat ="";
+        String resultat = "";
 
-        int nombre_ligne = (message.length()/cle.length())+1;
+        int nombre_ligne = (message.length() / cle.length()) + 1;
 
-        char[][] tableau_chiffrage = new char[(message.length()/cle.length())+1][cle.length()];
+        char[][] tableau_chiffrage = new char[nombre_ligne][cle.length()];
+
 
         int[] numeroTab = cleToNumeroAssocie(cle);
 
 
-        int compteur_i=0;
-        int compteur_j=0;
+        if (chiffre) {
 
-        //remplis le reste du tableau
-        for (int i=0 ; i<message.length() ; i++){
+            int compteur_i = 0;
+            int compteur_j = 0;
 
-            if(compteur_j==cle.length()){
+            //remplis le tableau
+            for (int i = 0; i < message.length(); i++) {
 
-                compteur_i++;
-                compteur_j=0;
-            }
+                if (compteur_j == cle.length()) {
 
-            tableau_chiffrage[compteur_i][compteur_j] = message.charAt(i);
-
-            compteur_j++;
-
-        }
-        /*TEST -------->*/
-        for (int i=0 ; i<nombre_ligne; i++){
-
-
-            for (int j=0 ; j<cle.length(); j++){
-
-                try{
-                    System.out.print(tableau_chiffrage[i][j]);
+                    compteur_i++;
+                    compteur_j = 0;
                 }
-                catch (Exception e){}
 
+                tableau_chiffrage[compteur_i][compteur_j] = message.charAt(i);
 
-            }
-
-            System.out.println("-----------------------");
-
-        }
-        /*------------------------>*/
-
-        //Chiffrage du message
-
-        Log.println(Log.ASSERT  , "tab numero -----> " , "vvvvvv");
-        showTab(numeroTab);
-
-        for (int i=0 ; i< cle.length(); i++){
-
-            int colonne_a_selectionner = indexOf(i , numeroTab);
-
-            Log.println(Log.ASSERT  , "COLONNE A SELECTIONNER" , Integer.toString(colonne_a_selectionner));
-
-            for (int j=0 ; j< (message.length()/cle.length())+1; j++){
-
-                try{
-
-
-
-                    resultat+= tableau_chiffrage[j][colonne_a_selectionner];
-
-                }catch(Exception e){}
+                compteur_j++;
 
             }
 
+            //Chiffrage du message
+            for (int i = 0; i < cle.length(); i++) {
+
+                int colonne_a_selectionner = indexOf(i, numeroTab);
+
+                for (int j = 0; j < nombre_ligne; j++) {
+
+                    try {
+
+                        resultat += tableau_chiffrage[j][colonne_a_selectionner];
+
+                    } catch (Exception e) {}
+                }
+            }
         }
 
-        return resultat;
+        //Si on dechiffre
+        if (!chiffre) {
 
-    }
+            char[][] tableau_dechiffrage;
+
+            int n = message.length();
+            int c = cle.length();
+
+            if (n % c == 0) {
+
+                tableau_dechiffrage = new char[n / c][c];
+                int compteur_i = 0;
+                int compteur_j = 0;
+                int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
+
+                for (int i = 0; i < message.length(); i++) {
+
+                    if (compteur_i == n / c) {
+
+                        compteur_j++;
+                        compteur_i = 0;
+                        colonne_a_selectionner = indexOf(compteur_j, numeroTab);
+                    }
+
+                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message.charAt(i);
+
+                    compteur_i++;
+                }
+
+            } else {
+
+                int r = n % c;
+                int q = n / c;
+
+                tableau_dechiffrage = new char[q + 1][c];
+
+                //les r premières colonnes seront remplies jusqu'au q+1 ième élement
+                //les c-r suivantes seront remplies jusqu'au qième élement
+
+                int compteur_i = 0;
+                int compteur_j = 0;
+                int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
+
+
+                for (int i = 0; i < message.length(); i++) {
+
+                    if ((compteur_j < r && compteur_i == q + 1) || compteur_j >= r && compteur_i == q) {
+
+                        compteur_j++;
+                        compteur_i = 0;
+                        colonne_a_selectionner = indexOf(compteur_j, numeroTab);
+                    }
+
+                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message.charAt(i);
+
+                    compteur_i++;
+                }
+            }
+
+            //déchiffrage du message
+            for (int i=0 ; i< nombre_ligne ; i++){
+
+                for (int j=0 ; j<cle.length() ; j++){
+
+                    try{
+
+                        resultat+=tableau_dechiffrage[i][j];
+
+                    }catch(Exception e){}
+                }
+            }
+        }
+
+                return resultat;
+        }
+
+
+
 
 
 
