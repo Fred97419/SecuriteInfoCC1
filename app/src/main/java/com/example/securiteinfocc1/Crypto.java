@@ -290,6 +290,7 @@ public class Crypto {
     //----------------------------------------------------------------------------------------------
 
     /**
+     * [Substitution]
      * Chiffrement de Hill, on prend le message qu'on divise par bloc de deux
      * caractères. Chaque caractère est associé à un numéro dans la table ASCII
      * étendue. On chanque la valeur de ces numéros en faisant le produit matriciel
@@ -378,6 +379,16 @@ public class Crypto {
     }
 
 
+    /**
+     * [Transposition]
+     * Transposition rectangulaire, on prend le message d'entrée et on va échanger la place de
+     * chaque lettre à l'aide de la clé.
+     *
+     * @param message à chiffrer/déchiffrer
+     * @param cle String servant à construire la table pour transposer les lettres
+     * @param chiffre Vrai pour chiffrer, Faux pour déchiffrer
+     * @return
+     */
     public static final String transpositionRectangulaire(String message , String cle , boolean chiffre) {
 
         String resultat = "";
@@ -500,11 +511,159 @@ public class Crypto {
         }
 
                 return resultat;
+    }
+
+
+    public static String DES(String message , String cle , boolean chiffre){
+
+        String resultat="";
+
+
+
+        return"";
+
+    }
+
+    //---------------------------------[FONCTIONS RELATIVES AU DES]---------------------------------
+
+    //convertis le message en tableau de bloc de 64 bits
+    public static final String[] messageToBloc (String message){
+
+        String[]blocs;
+        int nombre_blocs;
+
+        if((message.length() % 8) ==0 ) nombre_blocs = message.length()/8;
+
+        else {
+
+            nombre_blocs = (message.length()/8)+1;
+        }
+
+        blocs = new String[nombre_blocs];
+
+        int compteur_i=0;
+        String bloc="";
+
+        //sépare le message en bloc de 64 bits soit 8 caractère dans la table ASCII etendue
+
+            for (int i = 0; i < message.length(); i++) {
+
+                bloc+= message.charAt(i);
+
+                if ((i % 7 == 0 && i > 0)) {
+
+                    blocs[compteur_i] = bloc;
+                    bloc = "";
+                    compteur_i++;
+
+                }
+            }
+
+            blocs[compteur_i] = bloc;
+
+
+        //Traduction de chaque caractère d'un bloc (un caractère dans la table ASCII etendue correspondant à 8 bits)
+        for (int i=0 ; i<blocs.length ; i++){
+
+            Log.println(Log.ASSERT , " [DES] : Bloc du message n"+i , "Bloc -> "+ blocs[i]);
+
+            String bloc_binaire ="";
+
+            // remplis la chaine bloc binaire avec chaque représentation en binaire de chaque caractère
+            for (int j=0 ; j<blocs[i].length() ; j++){
+
+                bloc_binaire+=caracTo8Bits(blocs[i].charAt(j));
+
+            }
+
+            int reste_bits = 64-bloc_binaire.length(); //nombre de 0 à compléter pour obtenir un bloc de 64 bits
+
+            //complète avec des 0
+            for (int k=0 ; k < reste_bits ; k++){
+
+                bloc_binaire+='0';
+
+            }
+
+            Log.println(Log.ASSERT , " [DES] : Bloc en binaire du message n"+i , bloc_binaire);
+            blocs[i] = bloc_binaire;
+
+        }
+
+        return blocs;
+    }
+
+    //Convertit un caractère de la table ASCII etendue en chaine de 8 bits
+    public static final String caracTo8Bits(char c){
+
+        String result ="";
+        int reste_bits;
+        int carac = ExtendedAscii.getASCIICode(c);
+
+        result+= Integer.toBinaryString(carac);
+
+        reste_bits = 8 - result.length();
+
+        for (int i= 0 ; i< reste_bits ; i++){
+
+            result = '0'+result;
+
+        }
+
+        return result;
+
+    }
+
+    //Convertit un chiffre hexadecimal en chaine de 64 bits
+    public static final String hexaTo64Bits(String hexa){
+
+        String result="" ;
+        int bits_préfixe;
+        String zero_bits="";
+
+        for (int i=0 ; i<hexa.length() ; i++){
+
+            zero_bits="";
+            int hex = Integer.parseInt( Character.toString(hexa.charAt(i)) , 16);
+
+            Log.println(Log.ASSERT , "HEXA -> INT" , Integer.toString(hex));
+
+            String hex_binary = Integer.toBinaryString(hex);
+
+            Log.println(Log.ASSERT , "longueur bits sans 0" , Integer.toString(hex_binary.length()));
+
+            for (int j=0 ; j<4-hex_binary.length() ; j++){
+
+                zero_bits+='0';
+
+            }
+
+            hex_binary = zero_bits+hex_binary;
+            result += hex_binary;
+
         }
 
 
 
+        zero_bits="";
 
+        bits_préfixe = 64 - result.length();
+
+        for (int i=0 ; i< bits_préfixe ; i++){
+
+            zero_bits+='0';
+
+        }
+
+        result = zero_bits + result;
+
+        return result;
+
+    }
+
+
+
+    //----------------------------------------------------------------------------------------------
 
 
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
@@ -532,6 +691,7 @@ public class Crypto {
 
         }
 
+        return false;
         return false;
     }
 

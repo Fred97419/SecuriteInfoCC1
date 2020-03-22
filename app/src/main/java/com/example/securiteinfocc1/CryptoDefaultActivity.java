@@ -68,6 +68,15 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
+
+        String[] test;
+
+        test = Crypto.messageToBloc("ok");
+
+        Log.println(Log.ASSERT , "Test Hexa" , Crypto.hexaTo64Bits("0123456789abcdef"));
+
+
+
     }
 
     public void chiffreDechiffre(){
