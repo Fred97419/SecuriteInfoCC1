@@ -516,7 +516,15 @@ public class Crypto {
 
     public static String DES(String message , String cle , boolean chiffre){
 
+        //Si la clé fait plus de 64 bits ou que ce n'est pas un nombre hexadecimal
+        if( ! cleIsCorrect(cle)) return "Clé incorrecte ! ";
+
         String resultat="";
+
+        String[] blocs_message = messageToBloc(message);
+        String cleK = hexaTo64Bits(cle);
+
+        String[] tableau_sous_cleK = diversificationCle(cleK);
 
 
 
@@ -524,7 +532,144 @@ public class Crypto {
 
     }
 
-    //---------------------------------[FONCTIONS RELATIVES AU DES]---------------------------------
+    //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
+
+    private static final String[] diversificationCle(String cle){
+
+        String[] tableau_sous_cle = new String[16];
+
+        String[] tableau_C = new String[16];
+        String[] tableau_D = new String[16];
+
+        String[] tableau_sous_cle_PC2 = new String[16];
+
+        int[][] PC1Tab = {
+                         {57,49,41,33,25,17,9},
+                         {1,58,50,42,34,26,18},
+                         {10,2,59,51,43,35,27},
+                         {19,11,3,60,52,44,36},
+                         {63,55,47,39,31,23,15},
+                         {7,62,54,46,38,30,22},
+                         {14,6,61,53,45,37,29},
+                         {21,13,5,28,20,12,4}
+        };
+
+        int[][] PC2Tab = {
+                         {14,17,11,24,1,5},
+                         {3,28,15,6,21,10},
+                         {23,19,12,4,26,8},
+                         {16,7,27,20,13,2},
+                         {41,52,31,37,47,55},
+                         {30,40,51,45,33,48},
+                         {44,49,39,56,34,53},
+                         {46,42,50,36,29,32}
+
+        };
+
+        String PC1 = "";
+
+        //permutation initiale de la clé ou PC1 fait 58 bits
+
+        for (int i =0 ; i<8 ; i++){
+
+            for (int j=0 ; j<7 ; j++){
+
+
+                PC1+= cle.charAt(PC1Tab[i][j] -1);
+            }
+
+        }
+
+        //premiers C0 et D0
+        String C0 = PC1.substring(0,28);
+        String D0 = PC1.substring(28,56);
+
+        tableau_C[0] = C0;
+        tableau_D[0] = D0;
+
+        //15 autres Ci et Di
+        for (int i=1 ; i<16 ; i++){
+
+            if(i==1 || i==2 | i==9 ||i==16){
+
+                tableau_C[i] = rotateBitsLeft(tableau_C[i-1] , 1);
+                tableau_D[i] = rotateBitsLeft(tableau_D[i-1] , 1);
+
+            }
+
+            else {
+
+                tableau_C[i] = rotateBitsLeft(tableau_C[i-1] , 2);
+                tableau_D[i] = rotateBitsLeft(tableau_D[i-1] , 2);
+
+            }
+
+
+        }
+
+        //création des 16 sous clés avec Ki = Ci + Di
+        //et deuxième permutation PC2 pour chaque Ki avec le tableau PC2
+
+        for (int i = 0 ; i<tableau_sous_cle.length ; i++){
+
+            tableau_sous_cle[i] = tableau_C[i] + tableau_D[i];
+            String ki_PC2="";
+
+            for (int j=0 ; j<8 ; j++){
+
+                for(int k=0 ; k<6 ; k++){
+
+                    ki_PC2+=tableau_sous_cle[i].charAt( (PC2Tab[j][k])-1 );
+
+                }
+
+            }
+
+            tableau_sous_cle_PC2[i] = ki_PC2;
+            Log.println(Log.ASSERT , " [DES] Clé diversifiée n"+i , ki_PC2);
+
+
+        }
+
+
+        return tableau_sous_cle_PC2;
+
+    }
+
+
+    public static final String rotateBitsLeft(String bits , int decal){
+
+        String resultat = "";
+        char[] tableau_bits = new char[bits.length()];
+
+
+        for (int i =0  ; i<bits.length() ; i++){
+
+            tableau_bits[i] = bits.charAt(mod(i + decal , bits.length()));
+            resultat+=tableau_bits[i];
+        }
+
+
+        return resultat;
+
+    }
+
+    private static final boolean cleIsCorrect(String cle){
+
+        if(cle.length() > 16) return false;
+
+        for (int i=0 ; i<cle.length() ; i++){
+
+            char carac = cle.charAt(i);
+
+            if(  !(((carac>='0' && carac <='9')) || ((carac>='a') && (carac<='f'))) ) return false;
+
+        }
+
+        return true;
+
+
+    }
 
     //convertis le message en tableau de bloc de 64 bits
     public static final String[] messageToBloc (String message){
@@ -626,11 +771,9 @@ public class Crypto {
             zero_bits="";
             int hex = Integer.parseInt( Character.toString(hexa.charAt(i)) , 16);
 
-            Log.println(Log.ASSERT , "HEXA -> INT" , Integer.toString(hex));
-
             String hex_binary = Integer.toBinaryString(hex);
 
-            Log.println(Log.ASSERT , "longueur bits sans 0" , Integer.toString(hex_binary.length()));
+
 
             for (int j=0 ; j<4-hex_binary.length() ; j++){
 
@@ -640,6 +783,8 @@ public class Crypto {
 
             hex_binary = zero_bits+hex_binary;
             result += hex_binary;
+
+
 
         }
 
@@ -657,9 +802,12 @@ public class Crypto {
 
         result = zero_bits + result;
 
+        Log.println(Log.ASSERT , " [DES] Clé->(64bits) : ",result);
         return result;
 
     }
+
+
 
 
 
@@ -691,7 +839,6 @@ public class Crypto {
 
         }
 
-        return false;
         return false;
     }
 
