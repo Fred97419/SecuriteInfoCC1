@@ -549,6 +549,26 @@ public class Crypto {
             tableau_D[0] = D0;
 
 
+            for (int j=1 ; j<=16 ; j++){
+
+            Log.println(Log.ASSERT , "[DES] " , "---------------------[TOUR "+j+"]-----------------------------------");
+
+                tableau_G[j] = tableau_D[j-1];
+
+                tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[j-1]) );
+
+                Log.println(Log.ASSERT , "[DES]" , " ");
+                Log.println(Log.ASSERT , "[DES] G"+j+" : " , tableau_G[j]);
+                Log.println(Log.ASSERT , "[DES] D"+j+" : " , tableau_D[j]);
+                Log.println(Log.ASSERT , "[DES]" , " ");
+            }
+
+            String G16D16 = tableau_G[16] + tableau_D[16];
+            String Z = permutationFinale(G16D16);
+
+            Log.println(Log.ASSERT , "[DES]Bloc final permute" , Z);
+
+
         }
 
 
@@ -559,7 +579,7 @@ public class Crypto {
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
 
-    public static final String fonctionConfusion(String bloc32 , String cleDiversifie){
+    public static String fonctionConfusion(String bloc32 , String cleDiversifie){
 
         String resultat="";
 
@@ -634,7 +654,7 @@ public class Crypto {
 
         String B_transforme_32  = "";
 
-        Log.println(Log.ASSERT , "[DES]Fonction confusion","---------------------------[Fonction confusion]------------------------------");
+        //Log.println(Log.ASSERT , "[DES]Fonction confusion","---------------------------[Fonction confusion]------------------------------");
 
         //Expansion du bloc de 32 à 48 bits
 
@@ -649,7 +669,7 @@ public class Crypto {
 
         }
 
-        Log.println(Log.ASSERT , "Bloc etendu (48bits)",bloc48);
+       // Log.println(Log.ASSERT , "Bloc etendu (48bits)",bloc48);
 
         //Bloc etendue (48bits) XOR Clé diversifiée
 
@@ -691,7 +711,9 @@ public class Crypto {
 
             //on rajoute la représentation binaire (4bits) du nombre dans la table Si[ligne_a_selectionner][colonne_a_selectionner]
 
-            B_transforme_32 += S_box[i][ligne_a_selectionner][colonne_a_selectionner];
+            B_transforme_32 += intTo4Bits(
+                    S_box[i][ligne_a_selectionner][colonne_a_selectionner]
+            );
 
 
         }
@@ -713,7 +735,7 @@ public class Crypto {
     }
 
 
-    private static final String XOR(String blocA , String blocB){
+    private static String XOR(String blocA , String blocB){
 
         String result="";
 
@@ -738,7 +760,7 @@ public class Crypto {
 
     }
 
-    private static final String pemutationInitiale(String bloc){
+    private static String pemutationInitiale(String bloc){
 
         String bloc_permute ="";
 
@@ -769,7 +791,37 @@ public class Crypto {
 
     }
 
-    private static final String[] diversificationCle(String cle){
+    private static String permutationFinale(String bloc){
+
+        String result = "";
+
+        int [][] P = {
+                {40,8,48,16,56,24,64,32},
+                {39,7,47,15,55,23,63,31},
+                {38,6,46,14,54,22,62,30},
+                {37,5,45,13,53,21,61,29},
+                {36,4,44,12,52,20,60,28},
+                {35,3,43,11,51,19,59,27},
+                {34,2,42,10,50,18,58,26},
+                {33,1,41,9,49,17,57,25}
+        };
+
+
+        for (int i=0 ; i<8 ; i++){
+
+            for (int j=0 ; j<8 ; j++){
+
+                result+=bloc.charAt( (P[i][j]) -1);
+
+            }
+
+        }
+
+        return result;
+
+    }
+
+    private static  String[] diversificationCle(String cle){
 
         String[] tableau_sous_cle = new String[17];
 
@@ -777,6 +829,7 @@ public class Crypto {
         String[] tableau_D = new String[17];
 
         String[] tableau_sous_cle_PC2 = new String[17];
+        String[] tableau_sous_cle_final = new String[16];
 
         int[][] PC1Tab = {
                          {57,49,41,33,25,17,9},
@@ -861,18 +914,25 @@ public class Crypto {
             }
 
             tableau_sous_cle_PC2[i] = ki_PC2;
-            Log.println(Log.ASSERT , " [DES] Clé diversifiée n"+i , ki_PC2);
 
+
+        }
+        //on garde que les ki de 1 à 16
+        for (int i =0 ; i< 16 ; i++){
+
+            tableau_sous_cle_final[i] = tableau_sous_cle_PC2[i+1];
+
+            Log.println(Log.ASSERT , "[DES] Clé K"+(i+1) , tableau_sous_cle_final[i]);
 
         }
 
 
-        return tableau_sous_cle_PC2;
+        return tableau_sous_cle_final;
 
     }
 
 
-    private static final String rotateBitsLeft(String bits , int decal){
+    private static  String rotateBitsLeft(String bits , int decal){
 
         String resultat = "";
         char[] tableau_bits = new char[bits.length()];
@@ -889,7 +949,7 @@ public class Crypto {
 
     }
 
-    private static final boolean cleIsCorrect(String cle){
+    private static  boolean cleIsCorrect(String cle){
 
         if(cle.length() > 16) return false;
 
@@ -907,7 +967,7 @@ public class Crypto {
     }
 
     //convertis le message en tableau de bloc de 64 bits
-    private static final String[] messageToBloc (String message){
+    private static  String[] messageToBloc (String message){
 
         String[]blocs;
         int nombre_blocs;
@@ -974,7 +1034,7 @@ public class Crypto {
     }
 
     //Convertit un caractère de la table ASCII etendue en chaine de 8 bits
-    private static final String caracTo8Bits(char c){
+    private static  String caracTo8Bits(char c){
 
         String result ="";
         int reste_bits;
@@ -995,7 +1055,7 @@ public class Crypto {
     }
 
     //Convertit un chiffre hexadecimal en chaine de 64 bits
-    public static final String hexaTo64Bits(String hexa){
+    public static  String hexaTo64Bits(String hexa){
 
         String result="" ;
         int bits_préfixe;
@@ -1042,7 +1102,7 @@ public class Crypto {
 
     }
 
-    public static final String intTo4Bits(int n){
+    public static  String intTo4Bits(int n){
 
         String bits = Integer.toBinaryString(n);
 
@@ -1069,7 +1129,7 @@ public class Crypto {
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
     /*Enleve les doublons*/
-    private static final String deleteDoublons(String s) {
+    private static  String deleteDoublons(String s) {
         String result = "";
 
 
@@ -1083,7 +1143,7 @@ public class Crypto {
     }
 
     /*Vérifie si le caractère existe dans la clé*/
-    private static final boolean isInCle(char c , String cle){
+    private static  boolean isInCle(char c , String cle){
 
         for (int i = 0 ; i< cle.length() ; i++){
 
@@ -1095,7 +1155,7 @@ public class Crypto {
     }
 
     /*Transforme la cle en carré de polybe*/
-    private static final char[][] cleToPolybe (String cleTempo) {
+    private static  char[][] cleToPolybe (String cleTempo) {
 
         String cle_upper = cleTempo.toUpperCase();
         String cle = deleteDoublons(cle_upper);
@@ -1168,7 +1228,7 @@ public class Crypto {
         return resultat;
     }
 
-    public static final void showPolybe(char[][] polybe){
+    public static  void showPolybe(char[][] polybe){
 
         for (int i=0; i< 6 ; i++){
 
@@ -1187,7 +1247,7 @@ public class Crypto {
 
     }
 
-    public static final void showTab(int[] t){
+    public static  void showTab(int[] t){
 
         for (int i=0 ; i< t.length ; i++){
 
@@ -1199,7 +1259,7 @@ public class Crypto {
     }
 
     /*Transforme le carré de polybe en chiffre de playfair*/
-    private static final char[][] polybeToPlayfair (char[][] polybe){
+    private static  char[][] polybeToPlayfair (char[][] polybe){
 
         char[][] resultat = new char[6][6];
 
@@ -1219,7 +1279,7 @@ public class Crypto {
     }
 
     //vérifie si le caractère est une lettre ou un chiffre
-    private static final boolean isALetterOrNumber(char c){
+    private static  boolean isALetterOrNumber(char c){
 
         if( (c >='A' && c <= 'Z') || (c>='0' && c<='9')) return true;
 
@@ -1232,7 +1292,7 @@ public class Crypto {
     }
 
     //enlève les caractères qui ne sont pas des lettres ou des chiffres
-    private static final String deleteNoLettersAndNumbers(String s){
+    private static  String deleteNoLettersAndNumbers(String s){
 
         String result="";
 
@@ -1246,7 +1306,7 @@ public class Crypto {
     }
 
     //donne les coordonnées (x,y) d'un caractère dans un carré de polybe ou chiffre de playfair
-    private static final int[] letterCoordInPlayfair(char l , char[][] playfair){
+    private static  int[] letterCoordInPlayfair(char l , char[][] playfair){
 
         int[] resultat = new int[2];
 

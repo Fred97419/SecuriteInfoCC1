@@ -71,7 +71,7 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         String test="";
 
-        test = Crypto.DES("test" , "123456789abcdef" , true);
+        test = Crypto.DES("Ok" , "123456789abcdef" , true);
 
 
 
