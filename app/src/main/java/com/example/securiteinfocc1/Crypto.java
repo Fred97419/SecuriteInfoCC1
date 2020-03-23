@@ -545,6 +545,9 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES] G0 : " , G0);
             Log.println(Log.ASSERT , "[DES] D0 : " , D0);
 
+            tableau_G[0] = G0;
+            tableau_D[0] = D0;
+
 
         }
 
@@ -556,7 +559,161 @@ public class Crypto {
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
 
-    public static final String XOR(String blocA , String blocB){
+    public static final String fonctionConfusion(String bloc32 , String cleDiversifie){
+
+        String resultat="";
+
+        //Expansion
+        int[][] E = {
+                {32,1,2,3,4,5},
+                {4,5,6,7,8,9},
+                {8,9,10,11,12,13},
+                {12,13,14,15,16,17},
+                {16,17,18,19,20,21},
+                {20,21,22,23,24,25},
+                {24,25,26,27,28,29},
+                {28,29,30,31,32,1}
+        };
+
+        //Permutation Final
+        int [][] P_final = {
+                {16,7,20,21},
+                {29,12,28,17},
+                {1,15,23,26},
+                {5,18,31,10},
+                {2,8,24,14},
+                {32,27,3,9},
+                {19,13,30,6},
+                {22,11,4,25}
+        };
+
+        //S-Box
+        int S_box[][][] =  {
+                {       {14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7},
+                        {0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8},
+                        {4,1,14,8,13,6,2,11,15,12,9,7,3,10,5,0},
+                        {15,12,8,2,4,9,1,7,5,11,3,14,10,0,6,13}},
+                {
+                        {15,1,8,14,6,11,3,4,9,7,2,13,12,0,5,10},
+                        {3,13,4,7,15,2,8,14,12,0,1,10,6,9,11,5},
+                        {0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15},
+                        {0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15}},
+                {
+                        {10,0,9,14,6,3,15,5,1,13,12,7,11,4,2,8},
+                        {13,7,0,9,3,4,6,10,2,8,5,14,12,11,15,1},
+                        {13,6,4,9,8,15,3,0,11,1,2,12,5,10,14,7},
+                        {1,10,13,0,6,9,8,7,4,15,14,3,11,5,2,12}},
+                {
+                        {7,13,14,3,0,6,9,10,1,2,8,5,11,12,4,15},
+                        {13,8,11,5,6,15,0,3,4,7,2,12,1,10,14,9},
+                        {10,6,9,0,12,11,7,13,15,1,3,14,5,2,8,4},
+                        {3,15,0,6,10,1,13,8,9,41,5,11,12,7,2,14}},
+                {
+                        {2,12,4,1,7,10,11,6,8,5,3,15,13,0,14,9},
+                        {14,11,2,12,4,7,13,1,5,0,15,10,3,9,8,6},
+                        {4,2,1,11,10,13,7,8,15,9,12,5,6,3,0,14},
+                        {11,8,12,7,1,14,2,13,6,15,0,9,10,4,5,3}},
+                {
+                        {12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11},
+                        {10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8},
+                        {9,4,15,5,2,8,12,3,7,0,4,10,1,13,11,6},
+                        {4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13}},
+                {
+                        {4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1},
+                        {13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6},
+                        {1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2},
+                        {6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12}},
+                {
+                        {13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7},
+                        {1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2},
+                        {7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8},
+                        {2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11}}
+        };
+
+        String[] tableau_B = new String[8];
+
+        String B_transforme_32  = "";
+
+        Log.println(Log.ASSERT , "[DES]Fonction confusion","---------------------------[Fonction confusion]------------------------------");
+
+        //Expansion du bloc de 32 à 48 bits
+
+        String bloc48= "";
+
+        for (int i=0 ; i< 8 ; i++){
+
+            for (int j=0 ; j<6 ; j++){
+
+                bloc48 += bloc32.charAt( E[i][j] -1);
+            }
+
+        }
+
+        Log.println(Log.ASSERT , "Bloc etendu (48bits)",bloc48);
+
+        //Bloc etendue (48bits) XOR Clé diversifiée
+
+        String B = XOR(bloc48 , cleDiversifie);
+
+        //Decoupage de B (48bits) en 8 blocs de 6bits
+        for (int i=0 ; i<8 ; i++){
+
+            tableau_B[i] = B.substring(i*6 , (i+1)*6);
+
+        }
+
+        //-------------------------[TRANSFORMATION LOCALES]-----------------------------------------
+
+        //Transformation des 8 blocs Bi (8bits) en bloc de 4bits et réassemblage
+        for (int i=0 ; i < 8 ; i++){
+
+            String ligne_binary = "";
+            String colonne_binary = "";
+
+            // Construction de la chaine binaire contenant le premier et le dernier bit de Bi
+            ligne_binary += tableau_B[i].charAt(0);
+            ligne_binary += tableau_B[i].charAt(5);
+
+            //Transformation de la chaine en entier compris en 0 et 3 (2 bits)
+            int ligne_a_selectionner = Integer.parseInt(ligne_binary , 2);
+
+
+
+            // Construction de la chaine binaire contenant les bits indice 1,2,3,4 de Bi
+            colonne_binary+=tableau_B[i].charAt(1);
+            colonne_binary+=tableau_B[i].charAt(2);
+            colonne_binary+=tableau_B[i].charAt(3);
+            colonne_binary+=tableau_B[i].charAt(4);
+
+            //Transformation de la chaine en entier compris entre 0 et 15 (4 bits)
+            int colonne_a_selectionner = Integer.parseInt(colonne_binary , 2);
+
+
+            //on rajoute la représentation binaire (4bits) du nombre dans la table Si[ligne_a_selectionner][colonne_a_selectionner]
+
+            B_transforme_32 += S_box[i][ligne_a_selectionner][colonne_a_selectionner];
+
+
+        }
+        //Permutation final avec la table P_Final
+        for (int i=0 ; i<8  ; i++){
+
+            for(int j=0 ; j<4 ; j++){
+
+                resultat+=B_transforme_32.charAt( (P_final[i][j]) -1 );
+
+            }
+
+        }
+
+        return  resultat;
+
+
+
+    }
+
+
+    private static final String XOR(String blocA , String blocB){
 
         String result="";
 
@@ -614,12 +771,12 @@ public class Crypto {
 
     private static final String[] diversificationCle(String cle){
 
-        String[] tableau_sous_cle = new String[16];
+        String[] tableau_sous_cle = new String[17];
 
-        String[] tableau_C = new String[16];
-        String[] tableau_D = new String[16];
+        String[] tableau_C = new String[17];
+        String[] tableau_D = new String[17];
 
-        String[] tableau_sous_cle_PC2 = new String[16];
+        String[] tableau_sous_cle_PC2 = new String[17];
 
         int[][] PC1Tab = {
                          {57,49,41,33,25,17,9},
@@ -666,7 +823,7 @@ public class Crypto {
         tableau_D[0] = D0;
 
         //15 autres Ci et Di
-        for (int i=1 ; i<16 ; i++){
+        for (int i=1 ; i<=16 ; i++){
 
             if(i==1 || i==2 | i==9 ||i==16){
 
@@ -882,6 +1039,23 @@ public class Crypto {
 
         Log.println(Log.ASSERT , " [DES] Clé->(64bits) : ",result);
         return result;
+
+    }
+
+    public static final String intTo4Bits(int n){
+
+        String bits = Integer.toBinaryString(n);
+
+        String zero_restant ="";
+
+        for (int i=0 ; i<4-bits.length() ; i++){
+
+            zero_restant+='0';
+        }
+
+        bits = zero_restant+bits;
+
+        return bits;
 
     }
 

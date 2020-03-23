@@ -75,7 +75,6 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
 
 
-
     }
 
     public void chiffreDechiffre(){
