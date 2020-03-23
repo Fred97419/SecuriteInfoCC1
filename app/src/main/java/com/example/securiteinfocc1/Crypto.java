@@ -521,10 +521,32 @@ public class Crypto {
 
         String resultat="";
 
+        String[] tableau_G = new String[17];
+        String[] tableau_D = new String[17];
+
         String[] blocs_message = messageToBloc(message);
         String cleK = hexaTo64Bits(cle);
 
         String[] tableau_sous_cleK = diversificationCle(cleK);
+
+        //On applique pour tous les blocs de 64bits
+        for (int i=0 ; i<blocs_message.length ; i++){
+
+            Log.println(Log.ASSERT , "[DES]" , "---------------------------------[Bloc n"+i+"]---------------------------------------");
+
+            String bloc = blocs_message[i];
+
+            String bloc_permute = pemutationInitiale(bloc);
+            Log.println(Log.ASSERT , "[DES]" , " ");
+
+            String G0 = bloc_permute.substring(0,32);
+            String D0 = bloc_permute.substring(32,64);
+
+            Log.println(Log.ASSERT , "[DES] G0 : " , G0);
+            Log.println(Log.ASSERT , "[DES] D0 : " , D0);
+
+
+        }
 
 
 
@@ -533,6 +555,62 @@ public class Crypto {
     }
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
+
+    public static final String XOR(String blocA , String blocB){
+
+        String result="";
+
+        for (int i=0 ; i<blocA.length() ; i++){
+
+            if(blocA.charAt(i) == blocB.charAt(i)){
+
+                result+='0';
+
+            }
+
+            else {
+
+                result+='1';
+
+            }
+
+        }
+
+        return result;
+
+
+    }
+
+    private static final String pemutationInitiale(String bloc){
+
+        String bloc_permute ="";
+
+        int[][] P = {
+                {58,50,42,34,26,18,10,2},
+                {60,52,44,36,28,20,12,4},
+                {62,54,46,38,30,22,14,6},
+                {64,56,48,40,32,24,16,8},
+                {57,49,41,33,25,17,9,1},
+                {59,51,43,35,27,19,11,3},
+                {61,53,47,37,29,21,13,5},
+                {63,55,49,39,31,23,15,7}
+        };
+
+        for (int i=0 ; i<8 ; i++){
+
+            for (int j=0 ; j<8 ; j++){
+
+                bloc_permute+=bloc.charAt( P[i][j] -1 );
+
+            }
+
+        }
+
+        Log.println(Log.ASSERT , "[DES] Bloc initial : ","  "+bloc);
+        Log.println(Log.ASSERT , "[DES] P(Bloc initial): ",bloc_permute);
+        return bloc_permute;
+
+    }
 
     private static final String[] diversificationCle(String cle){
 
@@ -637,7 +715,7 @@ public class Crypto {
     }
 
 
-    public static final String rotateBitsLeft(String bits , int decal){
+    private static final String rotateBitsLeft(String bits , int decal){
 
         String resultat = "";
         char[] tableau_bits = new char[bits.length()];
@@ -672,7 +750,7 @@ public class Crypto {
     }
 
     //convertis le message en tableau de bloc de 64 bits
-    public static final String[] messageToBloc (String message){
+    private static final String[] messageToBloc (String message){
 
         String[]blocs;
         int nombre_blocs;
@@ -739,7 +817,7 @@ public class Crypto {
     }
 
     //Convertit un caractère de la table ASCII etendue en chaine de 8 bits
-    public static final String caracTo8Bits(char c){
+    private static final String caracTo8Bits(char c){
 
         String result ="";
         int reste_bits;
