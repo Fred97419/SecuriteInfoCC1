@@ -525,6 +525,7 @@ public class Crypto {
         String[] tableau_D = new String[17];
 
         String[] blocs_message = messageToBloc(message);
+
         String cleK = hexaTo64Bits(cle);
 
         String[] tableau_sous_cleK = diversificationCle(cleK);
@@ -539,8 +540,12 @@ public class Crypto {
             String bloc_permute = pemutationInitiale(bloc);
             Log.println(Log.ASSERT , "[DES]" , " ");
 
+
             String G0 = bloc_permute.substring(0,32);
             String D0 = bloc_permute.substring(32,64);
+
+
+
 
             Log.println(Log.ASSERT , "[DES] G0 : " , G0);
             Log.println(Log.ASSERT , "[DES] D0 : " , D0);
@@ -555,7 +560,8 @@ public class Crypto {
 
                 tableau_G[j] = tableau_D[j-1];
 
-                tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[j-1]) );
+                if (chiffre) tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[j-1]) );
+                if (!chiffre) tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[15 - (j-1)]) );
 
                 Log.println(Log.ASSERT , "[DES]" , " ");
                 Log.println(Log.ASSERT , "[DES] G"+j+" : " , tableau_G[j]);
@@ -566,18 +572,43 @@ public class Crypto {
             String G16D16 = tableau_G[16] + tableau_D[16];
             String Z = permutationFinale(G16D16);
 
+            Log.println(Log.ASSERT , "[DES]Bloc final" , G16D16);
             Log.println(Log.ASSERT , "[DES]Bloc final permute" , Z);
 
+
+            resultat+= bits64ToString(Z);
 
         }
 
 
 
-        return"";
+        return resultat ;
 
     }
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
+
+    private static String bits64ToString(String bloc64){
+
+        String result ="";
+
+        for (int i=0 ; i<8 ; i++){
+
+            String bitsCarac = bloc64.substring(8*i , 8*(i+1));
+
+            int numCarac = Integer.parseInt(bitsCarac , 2);
+
+
+            result+=ExtendedAscii.getChar(numCarac,1);
+
+
+        }
+
+        return result;
+
+
+
+    }
 
     public static String fonctionConfusion(String bloc32 , String cleDiversifie){
 
@@ -654,9 +685,7 @@ public class Crypto {
 
         String B_transforme_32  = "";
 
-        //Log.println(Log.ASSERT , "[DES]Fonction confusion","---------------------------[Fonction confusion]------------------------------");
-
-        //Expansion du bloc de 32 à 48 bits
+        Log.println(Log.ASSERT , "[DES]", "Clé K : "+cleDiversifie);
 
         String bloc48= "";
 
@@ -669,11 +698,15 @@ public class Crypto {
 
         }
 
-       // Log.println(Log.ASSERT , "Bloc etendu (48bits)",bloc48);
+
+
+        Log.println(Log.ASSERT , "[DES]Bloc etendu E(M)",bloc48);
 
         //Bloc etendue (48bits) XOR Clé diversifiée
 
         String B = XOR(bloc48 , cleDiversifie);
+
+        Log.println(Log.ASSERT , "[DES]E(M) XOR K",B);
 
         //Decoupage de B (48bits) en 8 blocs de 6bits
         for (int i=0 ; i<8 ; i++){
@@ -711,12 +744,19 @@ public class Crypto {
 
             //on rajoute la représentation binaire (4bits) du nombre dans la table Si[ligne_a_selectionner][colonne_a_selectionner]
 
-            B_transforme_32 += intTo4Bits(
+            String bits4 = intTo4Bits(
                     S_box[i][ligne_a_selectionner][colonne_a_selectionner]
             );
 
+            Log.println(Log.ASSERT , "[DES] S"+i , bits4);
+
+            B_transforme_32+=bits4;
+
 
         }
+
+        Log.println(Log.ASSERT , "[DES] B --> " , B_transforme_32);
+
         //Permutation final avec la table P_Final
         for (int i=0 ; i<8  ; i++){
 
@@ -728,12 +768,12 @@ public class Crypto {
 
         }
 
+        Log.println(Log.ASSERT , "[DES] P(B) --> " , resultat);
         return  resultat;
 
 
 
     }
-
 
     private static String XOR(String blocA , String blocB){
 
