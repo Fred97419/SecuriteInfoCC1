@@ -541,9 +541,8 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES]" , " ");
 
 
-            String G0 = bloc_permute.substring(0,32);
-            String D0 = bloc_permute.substring(32,64);
-
+            String G0 =   "01100110000000000110011011111111";//bloc_permute.substring(0,32);
+            String D0 =   "01111000010101010111100001010101";//bloc_permute.substring(32,64);
 
 
 
@@ -569,7 +568,7 @@ public class Crypto {
                 Log.println(Log.ASSERT , "[DES]" , " ");
             }
 
-            String G16D16 = tableau_G[16] + tableau_D[16];
+            String G16D16 = tableau_G[16].concat(tableau_D[16]);
             String Z = permutationFinale(G16D16);
 
             Log.println(Log.ASSERT , "[DES]Bloc final" , G16D16);
@@ -648,7 +647,7 @@ public class Crypto {
                         {15,1,8,14,6,11,3,4,9,7,2,13,12,0,5,10},
                         {3,13,4,7,15,2,8,14,12,0,1,10,6,9,11,5},
                         {0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15},
-                        {0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15}},
+                        {13,8,10,1,3,15,4,2,11,6,7,12,0,5,14,9}},
                 {
                         {10,0,9,14,6,3,15,5,1,13,12,7,11,4,2,8},
                         {13,7,0,9,3,4,6,10,2,8,5,14,12,11,15,1},
@@ -658,7 +657,7 @@ public class Crypto {
                         {7,13,14,3,0,6,9,10,1,2,8,5,11,12,4,15},
                         {13,8,11,5,6,15,0,3,4,7,2,12,1,10,14,9},
                         {10,6,9,0,12,11,7,13,15,1,3,14,5,2,8,4},
-                        {3,15,0,6,10,1,13,8,9,41,5,11,12,7,2,14}},
+                        {3,15,0,6,10,1,13,8,9,4,5,11,12,7,2,14}},
                 {
                         {2,12,4,1,7,10,11,6,8,5,3,15,13,0,14,9},
                         {14,11,2,12,4,7,13,1,5,0,15,10,3,9,8,6},
@@ -667,7 +666,7 @@ public class Crypto {
                 {
                         {12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11},
                         {10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8},
-                        {9,4,15,5,2,8,12,3,7,0,4,10,1,13,11,6},
+                        {9,14,15,5,2,8,12,3,7,0,4,10,1,13,11,6},
                         {4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13}},
                 {
                         {4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1},
@@ -1019,27 +1018,27 @@ public class Crypto {
             nombre_blocs = (message.length()/8)+1;
         }
 
+        Log.println(Log.ASSERT , "NOMBRE BLOCS ----> " , Integer.toString(nombre_blocs));
+
         blocs = new String[nombre_blocs];
 
         int compteur_i=0;
-        String bloc="";
+        String bloc;
 
         //sépare le message en bloc de 64 bits soit 8 caractère dans la table ASCII etendue
 
-            for (int i = 0; i < message.length(); i++) {
+            for (int i = 0; i < nombre_blocs; i++) {
 
-                bloc+= message.charAt(i);
+                if(i==(nombre_blocs-1)) bloc = message.substring(i*8, message.length());
 
-                if ((i % 7 == 0 && i > 0)) {
+                else {
 
-                    blocs[compteur_i] = bloc;
-                    bloc = "";
-                    compteur_i++;
-
+                    bloc = message.substring(i*8 , (i+1)*8);
                 }
-            }
 
-            blocs[compteur_i] = bloc;
+                blocs[i] = bloc;
+
+            }
 
 
         //Traduction de chaque caractère d'un bloc (un caractère dans la table ASCII etendue correspondant à 8 bits)

@@ -68,11 +68,7 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-
-        String test="";
-
-        test = Crypto.DES("Ok" , "123456789abcdef" , true);
-
+        Crypto.DES("OK" , "0123456789abcdef" , true);
 
 
     }
@@ -122,7 +118,17 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 case 6 :
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.transpositionRectangulaire(message , cle , chiffre));
 
-                }
+
+                case 7 :
+                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.DES(message , cle , chiffre));
+
+
+            }
+
+
+
+
+
 
 
 
