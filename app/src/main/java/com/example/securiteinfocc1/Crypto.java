@@ -541,8 +541,8 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES]" , " ");
 
 
-            String G0 =   "01100110000000000110011011111111";//bloc_permute.substring(0,32);
-            String D0 =   "01111000010101010111100001010101";//bloc_permute.substring(32,64);
+            String G0 =  bloc_permute.substring(0,32); //"01100110000000000110011011111111";
+            String D0 =  bloc_permute.substring(32,64); //"01111000010101010111100001010101";
 
 
 
@@ -568,7 +568,7 @@ public class Crypto {
                 Log.println(Log.ASSERT , "[DES]" , " ");
             }
 
-            String G16D16 = tableau_G[16].concat(tableau_D[16]);
+            String G16D16 = tableau_D[16].concat(tableau_G[16]);
             String Z = permutationFinale(G16D16);
 
             Log.println(Log.ASSERT , "[DES]Bloc final" , G16D16);
