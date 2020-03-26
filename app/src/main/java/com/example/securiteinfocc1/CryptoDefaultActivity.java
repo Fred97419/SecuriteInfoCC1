@@ -9,6 +9,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
+
+import java.nio.charset.Charset;
+
 
 public class CryptoDefaultActivity extends AppCompatActivity {
 
@@ -68,7 +73,24 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-        Crypto.DES("OK" , "0123456789abcdef" , true);
+
+
+
+
+        int t = EmojiManager.getAll().size();
+
+        Emoji[] emoji = EmojiManager.getAll().toArray(new Emoji[t]);
+
+        String  a ="";
+        for (int i=0 ; i<t ; i++){
+
+            a+= emoji[i].getUnicode() + " ";
+        }
+
+       // messageClairEdit.setText(a);
+
+
+
 
 
     }
@@ -78,6 +100,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
         String message = messageClairEdit.getText().toString();
         String cle = cleEdit.getText().toString();
 
+
+
         if (!(message.isEmpty())){
 
             switch (chiffrementID){
@@ -85,20 +109,24 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 /* Atbash */
                 case 0 :
                     messageChiffreEdit.setText(Crypto.atbash(message));
+                    break;
 
                 /*César 3*/
                 case 1 :
 
                     messageChiffreEdit.setText(Crypto.cesar(message , chiffre));
+                    break;
 
                 /*Vigenère*/
                 case 2 :
 
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.vigenere(message , cle , chiffre));
+                    break;
 
                 /*Playfair*/
                 case 4:
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.playfair(message,cle,chiffre));
+                    break;
 
                 /*Hill avec m=2*/
                 case 5:
@@ -112,32 +140,19 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                         int[][] cleHill = {{Integer.parseInt(a),Integer.parseInt(b)},{Integer.parseInt(c),Integer.parseInt(d)}};
 
                         messageChiffreEdit.setText(Crypto.hill(message , cleHill , chiffre));
-
+                        break;
                     }
                 /*Transposition Rectangulaire*/
                 case 6 :
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.transpositionRectangulaire(message , cle , chiffre));
+                    break;
 
 
                 case 7 :
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.DES(message , cle , chiffre));
-
+                    break;
 
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             }

@@ -2,6 +2,7 @@ package com.example.securiteinfocc1;
 
 import android.util.Log;
 
+import java.security.acl.LastOwnerException;
 import java.util.Arrays;
 
 public class Crypto {
@@ -530,6 +531,8 @@ public class Crypto {
 
         String[] tableau_sous_cleK = diversificationCle(cleK);
 
+        Log.println(Log.ASSERT , "TAILLE TABLEAU CLE" , Integer.toString(tableau_sous_cleK.length));
+
         //On applique pour tous les blocs de 64bits
         for (int i=0 ; i<blocs_message.length ; i++){
 
@@ -541,8 +544,8 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES]" , " ");
 
 
-            String G0 =  bloc_permute.substring(0,32); //"01100110000000000110011011111111";
-            String D0 =  bloc_permute.substring(32,64); //"01111000010101010111100001010101";
+            String G0 =   bloc_permute.substring(0,32);
+            String D0 =   bloc_permute.substring(32,64);
 
 
 
@@ -555,12 +558,20 @@ public class Crypto {
 
             for (int j=1 ; j<=16 ; j++){
 
+                String sous_cle_k;
+
             Log.println(Log.ASSERT , "[DES] " , "---------------------[TOUR "+j+"]-----------------------------------");
 
                 tableau_G[j] = tableau_D[j-1];
 
-                if (chiffre) tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[j-1]) );
-                if (!chiffre) tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , tableau_sous_cleK[15 - (j-1)]) );
+                 if (chiffre) sous_cle_k = tableau_sous_cleK[j-1];
+
+                 else {
+                     sous_cle_k = tableau_sous_cleK[ 15  - (j-1) ];
+                 }
+
+                tableau_D[j] = XOR(tableau_G[j-1] , fonctionConfusion(tableau_D[j-1] , sous_cle_k) );
+
 
                 Log.println(Log.ASSERT , "[DES]" , " ");
                 Log.println(Log.ASSERT , "[DES] G"+j+" : " , tableau_G[j]);
@@ -581,6 +592,7 @@ public class Crypto {
 
 
 
+
         return resultat ;
 
     }
@@ -597,8 +609,15 @@ public class Crypto {
 
             int numCarac = Integer.parseInt(bitsCarac , 2);
 
+            Log.println(Log.ASSERT , "[DES] Octet n"+i , bitsCarac);
+            Log.println(Log.ASSERT , "[DES] Octet -> entier n"+i , Integer.toString(numCarac));
+            Log.println(Log.ASSERT , "[DES] ENTIER -> carac n"+i , Character.toString(ExtendedAscii.getChar(numCarac , 0)));
 
-            result+=ExtendedAscii.getChar(numCarac,1);
+
+
+
+
+            result+=ExtendedAscii.getChar(numCarac,0);
 
 
         }
@@ -1051,7 +1070,11 @@ public class Crypto {
             // remplis la chaine bloc binaire avec chaque représentation en binaire de chaque caractère
             for (int j=0 ; j<blocs[i].length() ; j++){
 
-                bloc_binaire+=caracTo8Bits(blocs[i].charAt(j));
+                char carac =blocs[i].charAt(j);
+
+                Log.println(Log.ASSERT , "CARAC BLOC "+i , Character.toString(carac) + " " + ExtendedAscii.getASCIICode(carac));
+
+                bloc_binaire+=caracTo8Bits(carac);
 
             }
 
