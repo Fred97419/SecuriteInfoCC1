@@ -2,8 +2,15 @@ package com.example.securiteinfocc1;
 
 import android.util.Log;
 
+import com.vdurmont.emoji.Emoji;
+import com.vdurmont.emoji.EmojiManager;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.security.acl.LastOwnerException;
 import java.util.Arrays;
+
+import emoji4j.EmojiUtils;
 
 public class Crypto {
 
@@ -596,6 +603,98 @@ public class Crypto {
         return resultat ;
 
     }
+
+
+    public static String suprise (String message, String cle , boolean chiffre){
+
+        //tableau d'emoji
+        Emoji[] tab_emoji = EmojiManager.getAll().toArray(new Emoji[EmojiManager.getAll().size()]);
+
+
+
+
+        String resultat="";
+
+        //Transposition
+
+        int [] numero_cle = cleToNumeroAssocie(cle);
+
+        //augmente tous les numéros de 1
+        for (int nombre : numero_cle){
+
+            nombre++;
+            Log.println(Log.ASSERT , "SUPRISE" , Integer.toString(nombre));
+        }
+
+
+        if(chiffre) {
+
+            String message_transpose = transpositionRectangulaire(message, cle, true);
+
+            String message_transpose_fix = message_transpose.replace("\0", "");
+
+            Log.println(Log.ASSERT, "MESSAGE TRANSP_fix", message_transpose_fix);
+
+            int[] tableau_code = new int[message.length()];
+
+            //remplis le tableau de code
+            for (int i = 0; i < message.length(); i++) {
+
+
+                int code_ascii = ExtendedAscii.getASCIICode(message_transpose_fix.charAt(i));
+
+
+                if (code_ascii != 0) tableau_code[i] = code_ascii;
+
+                Log.println(Log.ASSERT, "SUPRISE -> avant n" + i, Integer.toString(tableau_code[i]));
+
+            }
+
+            //va transformer les code à l'aide de la clé
+            for (int i = 0; i < tableau_code.length; i++) {
+                //décalage de (numero de la lettre dans le tableau + son code ascii)
+
+
+                tableau_code[i] += ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
+
+                tableau_code[i] = tableau_code[i] % tab_emoji.length;
+
+                Log.println(Log.ASSERT, "SUPRISE -> Tableau n" + i, Integer.toString(tableau_code[i]));
+
+                resultat += tab_emoji[tableau_code[i]].getUnicode();
+
+            }
+
+        }
+
+        if(!chiffre) {
+
+
+            for (int i = 0; i < tab_emoji.length; i++) {
+
+                Log.println(Log.ASSERT, "EMOJI N-> " + i, tab_emoji[i].getHtmlHexadecimal());
+
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return resultat;
+    }
+
+
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
 
@@ -1190,6 +1289,21 @@ public class Crypto {
 
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
+
+
+    private static int getEmojiNumber(String emoji_unicode , Emoji[] tab){
+
+
+        for (int i=0 ; i<tab.length ; i++){
+
+            if(emoji_unicode.equals(StringEscapeUtils.escapeJava(tab[i].getUnicode()))) return i;
+
+        }
+
+        return -1;
+
+    }
+
     /*Enleve les doublons*/
     private static  String deleteDoublons(String s) {
         String result = "";
@@ -1391,7 +1505,7 @@ public class Crypto {
     }
 
     // donne l'inverse de a modulo m
-    private static int modInverse(int a, int m){
+    public static int modInverse(int a, int m){
 
         int m0 = m;
         int y = 0, x = 1;
@@ -1425,7 +1539,7 @@ public class Crypto {
     }
 
     //modulo pouvant prendre en compte les a%b avec a<0
-    private static int mod(int a, int b)
+    public static int mod(int a, int b)
     {
         int ret = a % b;
         if (ret < 0)

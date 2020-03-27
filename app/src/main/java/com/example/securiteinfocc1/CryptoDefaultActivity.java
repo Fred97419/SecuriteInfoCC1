@@ -77,21 +77,6 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
 
 
-        int t = EmojiManager.getAll().size();
-
-        Emoji[] emoji = EmojiManager.getAll().toArray(new Emoji[t]);
-
-        String  a ="";
-        for (int i=0 ; i<t ; i++){
-
-            a+= emoji[i].getUnicode() + " ";
-        }
-
-       // messageClairEdit.setText(a);
-
-
-
-
 
     }
 
@@ -152,6 +137,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.DES(message , cle , chiffre));
                     break;
 
+
+                case 8 :
+                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.suprise(message , cle , chiffre));
             }
 
 
