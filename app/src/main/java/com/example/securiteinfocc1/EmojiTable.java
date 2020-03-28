@@ -7,7 +7,7 @@ import com.vdurmont.emoji.EmojiManager;
 public class EmojiTable {
 
     Emoji[] emojitable =  EmojiManager.getAll().toArray(new Emoji[EmojiManager.getAll().size()]);
-    Emoji[] emojitable_simplified = new Emoji[851];
+    Emoji[] emojitable_simplified = new Emoji[848];
 
 
     public EmojiTable(){
@@ -16,7 +16,7 @@ public class EmojiTable {
         int compteur=0;
         for (int i=0 ; i<emojitable.length; i++){
 
-            if( (i>=0 && i<=143) || (i>=146 && i<=627) || (i>=638 && i<=836) || (i>=1048 && i<=1073)){
+            if( (i>=0 && i<=143) || (i>=146 && i<=627) || (i>=641 && i<=836) || (i>=1048 && i<=1073)){
 
                 emojitable_simplified[compteur] = emojitable[i];
                 compteur++;

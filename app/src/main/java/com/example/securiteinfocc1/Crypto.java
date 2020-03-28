@@ -392,14 +392,16 @@ public class Crypto {
      * Transposition rectangulaire, on prend le message d'entrée et on va échanger la place de
      * chaque lettre à l'aide de la clé.
      *
-     * @param message à chiffrer/déchiffrer
+     * @param messageT à chiffrer/déchiffrer
      * @param cle String servant à construire la table pour transposer les lettres
      * @param chiffre Vrai pour chiffrer, Faux pour déchiffrer
      * @return
      */
-    public static final String transpositionRectangulaire(String message , String cle , boolean chiffre) {
+    public static final String transpositionRectangulaire(String messageT , String cle , boolean chiffre) {
 
         String resultat = "";
+
+        String message = messageT.replace("\0", "");
 
         int nombre_ligne = (message.length() / cle.length()) + 1;
 
@@ -608,7 +610,10 @@ public class Crypto {
     public static String suprise (String message, String cle , boolean chiffre){
 
         //tableau d'emoji
-        Emoji[] tab_emoji = EmojiManager.getAll().toArray(new Emoji[EmojiManager.getAll().size()]);
+
+        EmojiTable emojitable = new EmojiTable();
+
+        Emoji[] tab_emoji = emojitable.getEmojitable_simplified();
 
 
 
@@ -670,25 +675,41 @@ public class Crypto {
         if(!chiffre) {
 
 
-            for (int i = 0; i < tab_emoji.length; i++) {
+            String hexa_html_message = EmojiUtils.hexHtmlify(message);
 
-                Log.println(Log.ASSERT, "EMOJI N-> " + i, tab_emoji[i].getHtmlHexadecimal());
+            String[] emojiTab =  hexa_html_message.split(";");
+
+            int[] emojiTabCode = new int [emojiTab.length];
+
+            String emojiToText = "";
+
+            Log.println(Log.ASSERT, "EMOJI HTMLHEX", hexa_html_message);
+
+
+            for (int i=0 ; i< emojiTab.length ; i++){
+
+                emojiTab[i]+=';';
+                emojiTabCode[i] = getEmojiNumber(emojiTab[i] , tab_emoji);
+
+                Log.println(Log.ASSERT, "EMOJI code", Integer.toString(emojiTabCode[i]));
+
+                emojiTabCode[i] -= ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
+
+                emojiTabCode[i] = mod(emojiTabCode[i] , tab_emoji.length);
+
+                Log.println(Log.ASSERT, "EMOJI code APRES", Integer.toString(emojiTabCode[i]));
+
+                emojiToText+= ExtendedAscii.getChar(emojiTabCode[i],0);
 
             }
 
+            String emojiToTesxtfixed = emojiToText.replace("\0" , "");
+
+            resultat = transpositionRectangulaire(emojiToTesxtfixed , cle , false);
+
+            Log.println(Log.ASSERT, "resultat", resultat);
 
         }
-
-
-
-
-
-
-
-
-
-
-
 
 
         return resultat;
@@ -1291,12 +1312,12 @@ public class Crypto {
 
 
 
-    private static int getEmojiNumber(String emoji_unicode , Emoji[] tab){
+    private static int getEmojiNumber(String emoji_html_hexa , Emoji[] tab){
 
 
         for (int i=0 ; i<tab.length ; i++){
 
-            if(emoji_unicode.equals(StringEscapeUtils.escapeJava(tab[i].getUnicode()))) return i;
+            if(emoji_html_hexa.equals(tab[i].getHtmlHexadecimal())) return i;
 
         }
 

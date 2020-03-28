@@ -75,6 +75,12 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
 
 
+        for (int i = 0 ; i<256 ; i++){
+
+
+            Log.println(Log.ASSERT , "TEST Carac" , Character.toString(ExtendedAscii.getChar(i , 0)));
+        }
+
 
 
 
