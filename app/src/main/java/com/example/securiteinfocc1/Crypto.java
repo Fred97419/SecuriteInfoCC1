@@ -35,7 +35,7 @@ public class Crypto {
 
                 int numeroCarac = ExtendedAscii.getASCIICode(message.charAt(i));
 
-                resultat += ExtendedAscii.getChar(254 - (numeroCarac) , 0);
+                resultat += ExtendedAscii.getChar(255 - (numeroCarac) , 0);
 
 
 
@@ -53,26 +53,28 @@ public class Crypto {
      *
      * @param message message à chiffrer
      * @param chiffre vrai si on chiffre, faux si on dechiffre
-     *
+     * @param decalage
      * @return message à déchiffrer
      */
-    public static final String cesar(String message , boolean chiffre){
+    public static final String cesar(String message , int decalage ,  boolean chiffre){
 
         String resultat="";
 
         for (int i = 0 ; i< message.length() ; i++){
 
+
+
             int numeroCarac = ExtendedAscii.getASCIICode(message.charAt(i));
 
-            if(chiffre) numeroCarac = (numeroCarac+3)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
-            if (!chiffre){
+            Log.println(Log.ASSERT , "TEST CESAR AVNT" , Integer.toString(numeroCarac));
 
-                numeroCarac-=3;
-                if(numeroCarac<0) numeroCarac = 255-numeroCarac; //evite de sortir de la table si le code ASCII est négatif
+            if(chiffre) numeroCarac = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
+            Log.println(Log.ASSERT , "TEST CESAR" , Integer.toString(numeroCarac));
 
-            }
+            if (!chiffre) numeroCarac = mod(numeroCarac-decalage , 256);
+
 
             resultat+=ExtendedAscii.getChar(numeroCarac , 0);
 
@@ -99,6 +101,8 @@ public class Crypto {
 
         String resultat = "";
 
+        Log.println(Log.ASSERT , "TEST vigenrere " , message);
+
         for (int i = 0 ; i< message.length() ; i++){
 
             int decalage = ExtendedAscii.getASCIICode(cle.charAt(i%(cle.length())));
@@ -106,15 +110,10 @@ public class Crypto {
 
             if(chiffre) numeroCarac = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
-            if (!chiffre){
-
-                numeroCarac-=decalage;
-                if(numeroCarac<0) numeroCarac = 255-numeroCarac; //evite de sortir de la table si le code ASCII est négatif
-
-
-            }
+            if (!chiffre) numeroCarac = mod(numeroCarac-decalage , 256);
 
             resultat+= ExtendedAscii.getChar(numeroCarac , 0);
+
 
 
 
@@ -410,6 +409,12 @@ public class Crypto {
 
         int[] numeroTab = cleToNumeroAssocie(cle);
 
+        for (int i=0 ; i<numeroTab.length ; i++){
+
+            Log.println(Log.ASSERT , "numero cle "+i , Integer.toString(numeroTab[i]));
+
+        }
+
 
         if (chiffre) {
 
@@ -455,6 +460,8 @@ public class Crypto {
             int n = message.length();
             int c = cle.length();
 
+            Log.println(Log.ASSERT , "Message à déchiffrer" , message);
+
             if (n % c == 0) {
 
                 tableau_dechiffrage = new char[n / c][c];
@@ -462,9 +469,11 @@ public class Crypto {
                 int compteur_j = 0;
                 int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
 
+
                 for (int i = 0; i < message.length(); i++) {
 
                     if (compteur_i == n / c) {
+
 
                         compteur_j++;
                         compteur_i = 0;
@@ -478,32 +487,73 @@ public class Crypto {
 
             } else {
 
+                int[] nombre_colonne_ecrire = new int[cle.length()];
+
+
+
                 int r = n % c;
                 int q = n / c;
 
-                tableau_dechiffrage = new char[q + 1][c];
-
                 //les r premières colonnes seront remplies jusqu'au q+1 ième élement
                 //les c-r suivantes seront remplies jusqu'au qième élement
+                for (int i=0 ; i<nombre_colonne_ecrire.length ; i++){
+
+                    if(i<r) nombre_colonne_ecrire[i] = q+1;
+
+                    else {
+
+                        nombre_colonne_ecrire[i] = q;
+
+                    }
+
+                    Log.println(Log.ASSERT , ""+i+"eme colonne -> " , Integer.toString(nombre_colonne_ecrire[i]) + "element");
+
+                }
+
+                tableau_dechiffrage = new char[q + 1][c];
+
+
 
                 int compteur_i = 0;
                 int compteur_j = 0;
                 int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
 
 
-                for (int i = 0; i < message.length(); i++) {
+                for (int i=0 ; i<message.length() ; i++){
 
-                    if ((compteur_j < r && compteur_i == q + 1) || compteur_j >= r && compteur_i == q) {
+                    if( (compteur_i==nombre_colonne_ecrire[colonne_a_selectionner]) && compteur_j!=cle.length() ){
 
+                        compteur_i=0;
                         compteur_j++;
-                        compteur_i = 0;
-                        colonne_a_selectionner = indexOf(compteur_j, numeroTab);
+                        colonne_a_selectionner = indexOf(compteur_j , numeroTab);
+                        Log.println(Log.ASSERT , "COLONNE A SELECTIONNER" , ""+colonne_a_selectionner );
+
                     }
 
                     tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message.charAt(i);
-
+                    Log.println(Log.ASSERT , "I,J" , "("+compteur_i+","+colonne_a_selectionner+")" );
                     compteur_i++;
+
                 }
+
+            }
+
+            for (int i=0 ; i<4; i++ ){
+
+
+
+                for (int j=0 ; j<4 ; j++){
+
+                    try{
+
+                        System.out.print(tableau_dechiffrage[i][j] + " ");
+
+                    }catch (Exception e){}
+
+
+                }
+                System.out.println( " ");
+
             }
 
             //déchiffrage du message
@@ -520,10 +570,31 @@ public class Crypto {
             }
         }
 
-                return resultat;
+
+
+        String resultat_fixed = resultat.replace("\0", "");
+
+        Log.println(Log.ASSERT , "TEST RESULT TRANSPO" , resultat_fixed);
+
+                return resultat_fixed;
     }
 
 
+    /**
+     * Va dériver 16 sous clés de 48 bits à partir de la clé de 64bits
+     * Va séparer le message en bloc de 64bits
+     * Pour chaque bloc va :
+     *
+     * -Effectuer une permutation initiale et séparer le bloc en deux blocs G0 et D0 de 32 bits
+     * -Construire les Gi et Di avec 16 itérations (en utilisant la fonction de confusion (Bloc,Clé-Diversifiée i)
+     * -Regrouper le bloc G16 et D16 et effectuer une permutaion finale
+     *
+     *
+     * @param message message à coder décoder
+     * @param cle clé en hexadécimal de 64bits
+     * @param chiffre Vrai pour chiffrer, faux pour déchiffrer
+     * @return
+     */
     public static String DES(String message , String cle , boolean chiffre){
 
         //Si la clé fait plus de 64 bits ou que ce n'est pas un nombre hexadecimal
@@ -607,6 +678,20 @@ public class Crypto {
     }
 
 
+    /**
+     * @see EmojiManager
+     * @see EmojiUtils
+     * @see EmojiTable
+     *
+     * Prend un message en texte, va effectuer une transposition des caractères avec une transposition
+     * rectangulaire.
+     * Puis pour chaque caractère va les subsituer avec un élement de la table des émoticônes
+     *
+     * @param message à chiffrer/déchiffrer
+     * @param cle
+     * @param chiffre
+     * @return
+     */
     public static String suprise (String message, String cle , boolean chiffre){
 
         //tableau d'emoji
@@ -719,6 +804,7 @@ public class Crypto {
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
 
+    //Transforme un bloc de 64bits en un caractère de la table ASCII etendue
     private static String bits64ToString(String bloc64){
 
         String result ="";
@@ -748,6 +834,7 @@ public class Crypto {
 
     }
 
+    //Fonction de confusion qui prendre un bloc de 32bits et une clé de 48 bits et renvoie un bloc de 32bits
     public static String fonctionConfusion(String bloc32 , String cleDiversifie){
 
         String resultat="";
@@ -913,6 +1000,7 @@ public class Crypto {
 
     }
 
+    //OU Exclusif
     private static String XOR(String blocA , String blocB){
 
         String result="";
@@ -1613,6 +1701,7 @@ public class Crypto {
         return false;
     }
 
+    //Prend une clé et renvoie un tableau d'entier avec pour chaque entier l'ordre croissant de chaque caractère de la clé
     public static int[] cleToNumeroAssocie(String cle){
 
         int[] resultat = new int[cle.length()];

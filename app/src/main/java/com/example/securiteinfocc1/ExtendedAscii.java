@@ -48,11 +48,47 @@ public class ExtendedAscii {
 
 
 
+    public static String AsciiCodeTableToString (int[]tab_ascii){
 
-    public static final char getChar(int code , int offset){
+        String result = "";
+
+        for (int i=0 ; i<tab_ascii.length ; i++){
+
+            int code = tab_ascii[i];
+
+            if(  (code>=0 &&  code <= 31)  || (code == 127) || code ==255){
+
+                String hexa = "\\x" + Integer.toHexString(code);
+
+                result+=hexa;
+            }
+
+            result+=getChar(code);
+
+
+
+
+        }
+
+
+
+        return result;
+
+    }
+
+    public static char getChar(int code , int offset){
 
 
         return (char) (EXTENDED[code]);
+
+    }
+
+
+    public static  String getChar(int code){
+
+        char r = (char) (EXTENDED[code]);
+
+        return Character.toString(r);
 
     }
 
@@ -73,5 +109,6 @@ public class ExtendedAscii {
         return  r ;
 
     }
+
 
 }

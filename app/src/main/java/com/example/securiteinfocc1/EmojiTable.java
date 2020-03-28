@@ -34,4 +34,7 @@ public class EmojiTable {
     public Emoji getEmoji(int i){return emojitable_simplified[i];}
 
 
+
+
+
 }

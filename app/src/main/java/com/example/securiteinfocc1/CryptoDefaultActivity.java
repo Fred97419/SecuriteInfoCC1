@@ -59,7 +59,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         setTitle(chiffrementName);
 
-        if (chiffrementID ==0 || chiffrementID == 1) cleEdit.setVisibility(View.INVISIBLE); //cache le bouton clé pour Atbash et César
+        if (chiffrementID ==0) cleEdit.setVisibility(View.INVISIBLE); //cache le bouton clé pour Atbash et César
+
+        if (chiffrementID ==1) cleEdit.setHint("Décalage");
 
         /* Affiche la clé sous forme de quatre nombres pour Hill*/
         if(chiffrementID != 5){
@@ -73,15 +75,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-
-
-        for (int i = 0 ; i<256 ; i++){
-
-
-            Log.println(Log.ASSERT , "TEST Carac" , Character.toString(ExtendedAscii.getChar(i , 0)));
-        }
-
-
+        String t = ExtendedAscii.AsciiCodeTableToString(new int[]{4 , 127});
+        messageClairEdit.setText(t);
 
 
     }
@@ -105,7 +100,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 /*César 3*/
                 case 1 :
 
-                    messageChiffreEdit.setText(Crypto.cesar(message , chiffre));
+                    int decalage = Integer.parseInt(cle);
+                    messageChiffreEdit.setText(Crypto.cesar(message , decalage ,chiffre));
                     break;
 
                 /*Vigenère*/
@@ -146,6 +142,7 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
                 case 8 :
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.suprise(message , cle , chiffre));
+                    break;
             }
 
 
