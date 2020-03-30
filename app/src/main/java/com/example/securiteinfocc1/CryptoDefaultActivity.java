@@ -75,19 +75,15 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
-        String t = ExtendedAscii.AsciiCodeTableToString(new int[]{124, 125 , 0 , 1 , 2 , 130 , 131});
-
-        int [] table = ExtendedAscii.StringToAsciiCodeTable(t);
-
-        Log.println(Log.ASSERT , "INT TAB TO STRING" , t);
-
-        for (int i=0 ; i<table.length ; i++){
 
 
-            Log.println(Log.ASSERT , "STRING to Int N"+i ,Integer.toString(table[i]));
+        String[] test = Crypto.intToStringBloc(6882326 , 3337);
+
+        for (String bloc :test){
+
+            Log.println(Log.ASSERT , "TEST" ,  bloc);
 
         }
-
 
     }
 

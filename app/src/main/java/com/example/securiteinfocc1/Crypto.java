@@ -839,9 +839,47 @@ public class Crypto {
 
     public static int RSA (int M , int p , int q , boolean chiffre){
 
-        //e = pgcd(e, (p-1)(q-1) == 1
+        String resultat ="";
 
-        
+        int n = p*q;
+        int indicatrice_euler = (p-1)*(q-1);
+
+        Log.println(Log.ASSERT , "RSA : n",Integer.toString(n));
+        Log.println(Log.ASSERT , "RSA : Phi(n)",Integer.toString(indicatrice_euler));
+
+        int e =0;
+
+        // e premier avec indicatrice euler soit pgcd(e, indicatrice_euler)
+
+        for (int i =q+1 ; i<n  ; i++){
+
+            if(pgcd(i , indicatrice_euler) == 1){
+
+                e = i;
+                break;
+
+            }
+
+        }
+
+        Log.println(Log.ASSERT , "RSA Clé publique ","("+e+","+n+")");
+
+        // d inverse e modulo Phi(n)
+        int d = modInverse(e , indicatrice_euler);
+
+        Log.println(Log.ASSERT , "RSA Clé publique ","("+d+","+n+")");
+
+        if(chiffre){
+
+
+
+
+        }
+
+
+
+
+
 
 
         return 1;
@@ -1440,6 +1478,45 @@ public class Crypto {
 
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
+
+    public static String[] intToStringBloc (int M , int n){
+
+        String M_string = Integer.toString(M);
+        ArrayList<String> list = new ArrayList<>();
+
+        if(M<= n){
+
+            list.add(Integer.toString(M));
+
+            return list.toArray(new String[1]);
+
+        }
+
+        int compteur= 0;
+        int borne_inf =0;
+        while(borne_inf != M_string.length()){
+
+            M_string = M_string.substring(borne_inf , M_string.length() - compteur);
+
+            if(Integer.parseInt(M_string) < n){
+
+                list.add(M_string);
+                borne_inf = M_string.length() - compteur;
+                compteur=0;
+
+            }
+
+            else {
+
+                compteur++;
+
+            }
+        }
+
+        return list.toArray(new String[list.size()]);
+
+
+    }
 
     private static int[] integerArrayListToIntArray(ArrayList<Integer> list){
 
