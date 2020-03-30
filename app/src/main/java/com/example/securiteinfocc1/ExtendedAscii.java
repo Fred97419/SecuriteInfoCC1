@@ -1,5 +1,8 @@
 package com.example.securiteinfocc1;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+
 public class ExtendedAscii {
 
     public static final char[] EXTENDED = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
@@ -50,7 +53,7 @@ public class ExtendedAscii {
 
     public static String AsciiCodeTableToString (int[]tab_ascii){
 
-        String result = "";
+        String result_t="";
 
         for (int i=0 ; i<tab_ascii.length ; i++){
 
@@ -58,22 +61,72 @@ public class ExtendedAscii {
 
             if(  (code>=0 &&  code <= 31)  || (code == 127) || code ==255){
 
-                String hexa = "\\x" + Integer.toHexString(code);
+                String hexa = Integer.toHexString(code);
 
-                result+=hexa;
+                if(hexa.length() !=2){
+
+                    hexa = '0'+hexa;
+
+                }
+
+                result_t+=  "\\x"+hexa;
             }
 
-            result+=getChar(code);
+            else{
 
+                result_t+=getChar(code);
 
-
+            }
 
         }
 
 
 
-        return result;
+        return result_t;
 
+    }
+
+
+    public static int[] StringToAsciiCodeTable(String s){
+
+        Integer[] result_integer;
+        int[] result;
+        ArrayList<Integer> list = new ArrayList<Integer>();
+
+        for (int i=0 ; i<s.length() ; i++){
+
+            char carac = s.charAt(i);
+
+            if(carac == '\\' &&  s.charAt(i+1) == 'x') {
+
+                String hex = s.substring(i+2 , i+4);
+
+                int hex_int = Integer.parseInt(hex , 16);
+
+                list.add(new Integer(hex_int));
+                i+=3;
+
+
+            }
+
+            else {
+
+                list.add(getASCIICode(carac));
+
+            }
+        }
+
+        result_integer = list.toArray(new Integer[list.size()]);
+
+        result = new int[result_integer.length];
+
+        for (int i=0 ; i<result_integer.length ; i++){
+
+            result[i] = result_integer[i].intValue();
+
+        }
+
+        return result;
     }
 
     public static char getChar(int code , int offset){

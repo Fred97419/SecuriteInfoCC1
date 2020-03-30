@@ -5,9 +5,8 @@ import android.util.Log;
 import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 
-import java.security.acl.LastOwnerException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import emoji4j.EmojiUtils;
@@ -29,17 +28,17 @@ public class Crypto {
     public static final String atbash(String message){
 
         String resultat ="";
+        int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
 
-            for (int i=0 ; i<message.length() ; i++){
+            for (int i=0 ; i<message_int.length ; i++){
 
 
-                int numeroCarac = ExtendedAscii.getASCIICode(message.charAt(i));
-
-                resultat += ExtendedAscii.getChar(255 - (numeroCarac) , 0);
-
+                message_int[i] = 255 - message_int[i];
 
 
             }
+
+            resultat = ExtendedAscii.AsciiCodeTableToString(message_int);
 
             return resultat;
     }
@@ -59,27 +58,22 @@ public class Crypto {
     public static final String cesar(String message , int decalage ,  boolean chiffre){
 
         String resultat="";
+        int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
 
-        for (int i = 0 ; i< message.length() ; i++){
+        for (int i = 0 ; i< message_int.length ; i++){
 
+            int numeroCarac = message_int[i];
 
-
-            int numeroCarac = ExtendedAscii.getASCIICode(message.charAt(i));
-
-
-            Log.println(Log.ASSERT , "TEST CESAR AVNT" , Integer.toString(numeroCarac));
-
-            if(chiffre) numeroCarac = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
+            if(chiffre) message_int[i] = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
             Log.println(Log.ASSERT , "TEST CESAR" , Integer.toString(numeroCarac));
 
-            if (!chiffre) numeroCarac = mod(numeroCarac-decalage , 256);
-
-
-            resultat+=ExtendedAscii.getChar(numeroCarac , 0);
+            if (!chiffre) message_int[i] = mod(numeroCarac-decalage , 256);
 
 
         }
+
+        resultat = ExtendedAscii.AsciiCodeTableToString(message_int);
 
         return resultat;
 
@@ -101,23 +95,25 @@ public class Crypto {
 
         String resultat = "";
 
-        Log.println(Log.ASSERT , "TEST vigenrere " , message);
-
-        for (int i = 0 ; i< message.length() ; i++){
-
-            int decalage = ExtendedAscii.getASCIICode(cle.charAt(i%(cle.length())));
-            int numeroCarac = ExtendedAscii.getASCIICode(message.charAt(i));
-
-            if(chiffre) numeroCarac = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
-
-            if (!chiffre) numeroCarac = mod(numeroCarac-decalage , 256);
-
-            resultat+= ExtendedAscii.getChar(numeroCarac , 0);
+        int[] message_to_tabint = ExtendedAscii.StringToAsciiCodeTable(message);
+        int[] cle_to_tabint = ExtendedAscii.StringToAsciiCodeTable(cle);
 
 
+        for (int i = 0 ; i< message_to_tabint.length ; i++){
+
+            //décalage
+            int decalage = cle_to_tabint[i%cle_to_tabint.length];
+
+            int numeroCarac = message_to_tabint[i];
+
+            if(chiffre) message_to_tabint[i] = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
+
+            if (!chiffre) message_to_tabint[i] = mod(numeroCarac-decalage , 256);
 
 
         }
+
+        resultat= ExtendedAscii.AsciiCodeTableToString(message_to_tabint);
 
         return resultat;
 
@@ -315,10 +311,40 @@ public class Crypto {
         String resultat="";
 
         //Rajout d'un caractère '*' si le message n'est pas de longueur pair
-        if(message.length() %2 !=0) message+= '*';
+
+        int[] message_int_t = ExtendedAscii.StringToAsciiCodeTable(message);
+        int[] message_int;
+
+        if(message_int_t.length %2 != 0){
+
+            message_int= new int[message_int_t.length+1];
+
+            for (int i=0 ; i<message_int_t.length ; i++){
+
+                message_int[i] = message_int_t[i];
+
+            }
+
+            message_int[message_int.length-1] = ExtendedAscii.getASCIICode('*');
+
+
+        }
+
+        else {
+
+            message_int = new int[message_int_t.length];
+
+            for (int i=0 ; i<message_int_t.length ; i++){
+
+                message_int[i] = message_int_t[i];
+            }
+
+        }
 
         //det = a*d - b*c
         int det = (cle[0][0]*cle[1][1]) - (cle[0][1]*cle[1][0]);
+
+        Log.println(Log.ASSERT , "PGCD DET" , Integer.toString(pgcd(det , 256)));
 
         if(pgcd(det , 256) != 1){
 
@@ -327,6 +353,8 @@ public class Crypto {
             return resultat;
 
         }
+
+
 
         if(!chiffre){
 
@@ -351,19 +379,20 @@ public class Crypto {
 
 
         /* On parcourt les blocs de deux lettres et on éffectue le produit matriciel entre la clé et le bloc */
-        String blocLettre="";
+
+        int[] blocLettre;
         int x_bloc[];
         int y_bloc[];
-        for (int i=0 ; i<message.length(); i+=2){
+        for (int i=0 ; i<message_int.length ; i+=2){
 
-            blocLettre="";
+            blocLettre= new int[2];
             x_bloc = new int[2];
 
-            blocLettre += message.charAt(i);
-            blocLettre += message.charAt(i+1);
+            blocLettre[0] = message_int[i];
+            blocLettre[1] = message_int[i+1];
 
-            x_bloc[0] = ExtendedAscii.getASCIICode(blocLettre.charAt(0)); //x0
-            x_bloc[1] = ExtendedAscii.getASCIICode(blocLettre.charAt(1)); //x1
+            x_bloc[0] = blocLettre[0];
+            x_bloc[1] = blocLettre[1]; //x1
 
             Log.println(Log.ASSERT , "VALEUR X0 -> " , Integer.toString(x_bloc[0]));
             Log.println(Log.ASSERT , "VALEUR X1 -> " , Integer.toString(x_bloc[1]));
@@ -375,11 +404,13 @@ public class Crypto {
 
 
 
-            resultat+= ExtendedAscii.getChar(y_bloc[0] , 0);
-            resultat+= ExtendedAscii.getChar(y_bloc[1] , 0);
+            message_int[i] = y_bloc[0] ;
+            message_int[i+1] = y_bloc[1];
 
 
         }
+
+        resultat=ExtendedAscii.AsciiCodeTableToString(message_int);
 
         return resultat;
 
@@ -398,13 +429,19 @@ public class Crypto {
      */
     public static final String transpositionRectangulaire(String messageT , String cle , boolean chiffre) {
 
-        String resultat = "";
+        String resultat;
 
-        String message = messageT.replace("\0", "");
+        String message = messageT.replace("\\x00" , "");
 
-        int nombre_ligne = (message.length() / cle.length()) + 1;
 
-        char[][] tableau_chiffrage = new char[nombre_ligne][cle.length()];
+        int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
+        int[] cle_int     = ExtendedAscii.StringToAsciiCodeTable(cle);
+
+        ArrayList<Integer> list_resultat_int = new ArrayList<>();
+
+        int nombre_ligne = (message_int.length / cle_int.length) + 1;
+
+        int[][] tableau_chiffrage = new int[nombre_ligne][cle_int.length];
 
 
         int[] numeroTab = cleToNumeroAssocie(cle);
@@ -422,15 +459,15 @@ public class Crypto {
             int compteur_j = 0;
 
             //remplis le tableau
-            for (int i = 0; i < message.length(); i++) {
+            for (int i = 0; i < message_int.length; i++) {
 
-                if (compteur_j == cle.length()) {
+                if (compteur_j == cle_int.length) {
 
                     compteur_i++;
                     compteur_j = 0;
                 }
 
-                tableau_chiffrage[compteur_i][compteur_j] = message.charAt(i);
+                tableau_chiffrage[compteur_i][compteur_j] = message_int[i];
 
                 compteur_j++;
 
@@ -445,7 +482,7 @@ public class Crypto {
 
                     try {
 
-                        resultat += tableau_chiffrage[j][colonne_a_selectionner];
+                        list_resultat_int.add(tableau_chiffrage[j][colonne_a_selectionner]);
 
                     } catch (Exception e) {}
                 }
@@ -455,22 +492,20 @@ public class Crypto {
         //Si on dechiffre
         if (!chiffre) {
 
-            char[][] tableau_dechiffrage;
+            int[][] tableau_dechiffrage;
 
-            int n = message.length();
-            int c = cle.length();
-
-            Log.println(Log.ASSERT , "Message à déchiffrer" , message);
+            int n = message_int.length;
+            int c = cle_int.length;
 
             if (n % c == 0) {
 
-                tableau_dechiffrage = new char[n / c][c];
+                tableau_dechiffrage = new int[n / c][c];
                 int compteur_i = 0;
                 int compteur_j = 0;
                 int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
 
 
-                for (int i = 0; i < message.length(); i++) {
+                for (int i = 0; i < message_int.length; i++) {
 
                     if (compteur_i == n / c) {
 
@@ -480,7 +515,7 @@ public class Crypto {
                         colonne_a_selectionner = indexOf(compteur_j, numeroTab);
                     }
 
-                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message.charAt(i);
+                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message_int[i];
 
                     compteur_i++;
                 }
@@ -510,7 +545,7 @@ public class Crypto {
 
                 }
 
-                tableau_dechiffrage = new char[q + 1][c];
+                tableau_dechiffrage = new int[q + 1][c];
 
 
 
@@ -519,9 +554,9 @@ public class Crypto {
                 int colonne_a_selectionner = indexOf(compteur_j, numeroTab);
 
 
-                for (int i=0 ; i<message.length() ; i++){
+                for (int i=0 ; i<message_int.length ; i++){
 
-                    if( (compteur_i==nombre_colonne_ecrire[colonne_a_selectionner]) && compteur_j!=cle.length() ){
+                    if( (compteur_i==nombre_colonne_ecrire[colonne_a_selectionner]) && compteur_j!=cle_int.length ){
 
                         compteur_i=0;
                         compteur_j++;
@@ -530,7 +565,7 @@ public class Crypto {
 
                     }
 
-                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message.charAt(i);
+                    tableau_dechiffrage[compteur_i][colonne_a_selectionner] = message_int[i];
                     Log.println(Log.ASSERT , "I,J" , "("+compteur_i+","+colonne_a_selectionner+")" );
                     compteur_i++;
 
@@ -563,7 +598,7 @@ public class Crypto {
 
                     try{
 
-                        resultat+=tableau_dechiffrage[i][j];
+                        list_resultat_int.add(tableau_dechiffrage[i][j]);
 
                     }catch(Exception e){}
                 }
@@ -571,12 +606,11 @@ public class Crypto {
         }
 
 
+            int[] resultat_int = integerArrayListToIntArray(list_resultat_int);
 
-        String resultat_fixed = resultat.replace("\0", "");
-
-        Log.println(Log.ASSERT , "TEST RESULT TRANSPO" , resultat_fixed);
-
-                return resultat_fixed;
+            resultat = ExtendedAscii.AsciiCodeTableToString(resultat_int);
+            String resultat_fixed = resultat.replace("\\x00" , "");
+            return resultat_fixed;
     }
 
 
@@ -605,7 +639,9 @@ public class Crypto {
         String[] tableau_G = new String[17];
         String[] tableau_D = new String[17];
 
-        String[] blocs_message = messageToBloc(message);
+        int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
+
+        String[] blocs_message = messageToBloc(message_int);
 
         String cleK = hexaTo64Bits(cle);
 
@@ -801,6 +837,18 @@ public class Crypto {
     }
 
 
+    public static int RSA (int M , int p , int q , boolean chiffre){
+
+        //e = pgcd(e, (p-1)(q-1) == 1
+
+        
+
+
+        return 1;
+
+    }
+
+
 
     //-------------------------------[FONCTIONS RELATIVES AU DES]-----------------------------------
 
@@ -808,6 +856,7 @@ public class Crypto {
     private static String bits64ToString(String bloc64){
 
         String result ="";
+        int[] result_int = new int[8];
 
         for (int i=0 ; i<8 ; i++){
 
@@ -817,16 +866,11 @@ public class Crypto {
 
             Log.println(Log.ASSERT , "[DES] Octet n"+i , bitsCarac);
             Log.println(Log.ASSERT , "[DES] Octet -> entier n"+i , Integer.toString(numCarac));
-            Log.println(Log.ASSERT , "[DES] ENTIER -> carac n"+i , Character.toString(ExtendedAscii.getChar(numCarac , 0)));
 
-
-
-
-
-            result+=ExtendedAscii.getChar(numCarac,0);
-
-
+            result_int[i] = numCarac;
         }
+
+        result = ExtendedAscii.AsciiCodeTableToString(result_int);
 
         return result;
 
@@ -1233,84 +1277,82 @@ public class Crypto {
     }
 
     //convertis le message en tableau de bloc de 64 bits
-    private static  String[] messageToBloc (String message){
+    private static  String[] messageToBloc (int[] message){
 
-        String[]blocs;
+        int[][]blocs;
         int nombre_blocs;
+        String[] blocs_binaire;
 
-        if((message.length() % 8) ==0 ) nombre_blocs = message.length()/8;
+        if((message.length % 8) ==0 ) nombre_blocs = message.length/8;
 
         else {
 
-            nombre_blocs = (message.length()/8)+1;
+            nombre_blocs = (message.length/8)+1;
         }
 
         Log.println(Log.ASSERT , "NOMBRE BLOCS ----> " , Integer.toString(nombre_blocs));
 
-        blocs = new String[nombre_blocs];
+        blocs = new int[nombre_blocs][8];
 
-        int compteur_i=0;
-        String bloc;
+        blocs_binaire = new String[nombre_blocs];
 
-        //sépare le message en bloc de 64 bits soit 8 caractère dans la table ASCII etendue
+        int[] bloc;
 
-            for (int i = 0; i < nombre_blocs; i++) {
+        //remplis le message avec des zeros pour que le messsage soit un multiple de 8
 
-                if(i==(nombre_blocs-1)) bloc = message.substring(i*8, message.length());
+        int[] message_avec_zero = new int[nombre_blocs*8];
 
-                else {
+        for (int i=0 ; i<nombre_blocs*8 ; i++){
 
-                    bloc = message.substring(i*8 , (i+1)*8);
-                }
+            if(i>=message.length) message_avec_zero[i] = 0;
 
-                blocs[i] = bloc;
+            else {
+
+                message_avec_zero[i] = message[i];
+            }
+
+        }
+
+        //remplis chaque blocs i avec 8 caractères en int
+
+        for (int i=0 ; i<nombre_blocs ; i++){
+
+
+            for (int j =0 ; j<8 ; j++){
+
+                blocs[i][j] = message_avec_zero[j + (i*8)];
 
             }
+
+        }
 
 
         //Traduction de chaque caractère d'un bloc (un caractère dans la table ASCII etendue correspondant à 8 bits)
         for (int i=0 ; i<blocs.length ; i++){
 
-            Log.println(Log.ASSERT , " [DES] : Bloc du message n"+i , "Bloc -> "+ blocs[i]);
-
             String bloc_binaire ="";
 
-            // remplis la chaine bloc binaire avec chaque représentation en binaire de chaque caractère
-            for (int j=0 ; j<blocs[i].length() ; j++){
+            for (int j=0 ; j<8 ; j++){
 
-                char carac =blocs[i].charAt(j);
-
-                Log.println(Log.ASSERT , "CARAC BLOC "+i , Character.toString(carac) + " " + ExtendedAscii.getASCIICode(carac));
-
-                bloc_binaire+=caracTo8Bits(carac);
+                bloc_binaire+= caracTo8Bits(blocs[i][j]);
 
             }
 
-            int reste_bits = 64-bloc_binaire.length(); //nombre de 0 à compléter pour obtenir un bloc de 64 bits
-
-            //complète avec des 0
-            for (int k=0 ; k < reste_bits ; k++){
-
-                bloc_binaire+='0';
-
-            }
-
-            Log.println(Log.ASSERT , " [DES] : Bloc en binaire du message n"+i , bloc_binaire);
-            blocs[i] = bloc_binaire;
+            blocs_binaire[i] = bloc_binaire;
 
         }
 
-        return blocs;
+        return blocs_binaire;
     }
 
     //Convertit un caractère de la table ASCII etendue en chaine de 8 bits
-    private static  String caracTo8Bits(char c){
+    private static  String caracTo8Bits(int c){
 
         String result ="";
         int reste_bits;
-        int carac = ExtendedAscii.getASCIICode(c);
 
-        result+= Integer.toBinaryString(carac);
+
+        result+= Integer.toBinaryString(c);
 
         reste_bits = 8 - result.length();
 
@@ -1399,6 +1441,24 @@ public class Crypto {
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
 
+    private static int[] integerArrayListToIntArray(ArrayList<Integer> list){
+
+        int [] result;
+
+        Integer[] integer = list.toArray(new Integer[list.size()]);
+
+        result = new int[integer.length];
+
+
+        for (int i=0 ; i<integer.length ; i++){
+
+            result[i] = integer[i].intValue();
+
+        }
+
+        return result;
+
+    }
 
     private static int getEmojiNumber(String emoji_html_hexa , Emoji[] tab){
 
@@ -1742,6 +1802,8 @@ public class Crypto {
         return -1;
 
     }
+
+
 
     //----------------------------------------------------------------------------------------------
 
