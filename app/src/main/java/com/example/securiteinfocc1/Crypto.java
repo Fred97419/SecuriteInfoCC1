@@ -6,6 +6,7 @@ import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -736,9 +737,6 @@ public class Crypto {
 
         Emoji[] tab_emoji = emojitable.getEmojitable_simplified();
 
-
-
-
         String resultat="";
 
         //Transposition
@@ -837,10 +835,12 @@ public class Crypto {
     }
 
 
-    public static int RSA (int M , int p , int q , boolean chiffre){
+    public static String RSA (int M , int p , int q , boolean chiffre){
 
         String resultat ="";
 
+
+        //calcul de n
         int n = p*q;
         int indicatrice_euler = (p-1)*(q-1);
 
@@ -867,22 +867,36 @@ public class Crypto {
         // d inverse e modulo Phi(n)
         int d = modInverse(e , indicatrice_euler);
 
-        Log.println(Log.ASSERT , "RSA Clé publique ","("+d+","+n+")");
+        Log.println(Log.ASSERT , "RSA Clé privé ","("+d+","+n+")");
 
-        if(chiffre){
+        //chiffrage ou déchiffrage des blocs
+        String[] blocsM = mToStringBloc(M , n);
+
+        //utilisation de BigInteger car un double ne peut pas stocker une valeur aussi grande
+
+        BigInteger e_big =  BigInteger.valueOf((long) e);
+        BigInteger d_big = BigInteger.valueOf((long) d);
+        BigInteger n_big = BigInteger.valueOf((long) n);
+
+            for (int i=0 ; i<blocsM.length ; i++){
+
+                Log.println(Log.ASSERT , "Bloc n"+i , blocsM[i]);
+
+                BigInteger bloc_chiffre_dechiffre = BigInteger.valueOf(0);
+                BigInteger bloc = BigInteger.valueOf(Long.parseLong(blocsM[i]));
+
+                if(chiffre) bloc_chiffre_dechiffre = bloc.modPow(e_big,n_big);
+
+                if(!chiffre) bloc_chiffre_dechiffre = bloc.modPow(d_big , n_big);
 
 
+                Log.println(Log.ASSERT , "Bloc n chiffer/dechif"+i , ""+bloc_chiffre_dechiffre.toString());
 
+                resultat+=bloc_chiffre_dechiffre.toString();
 
-        }
+            }
 
-
-
-
-
-
-
-        return 1;
+        return resultat;
 
     }
 
@@ -1479,12 +1493,14 @@ public class Crypto {
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
 
 
-    public static String[] intToStringBloc (int M , int n){
+    //Divise M en bloc
+    public static String[] mToStringBloc (int M , int n){
 
         String M_string = Integer.toString(M);
+
         ArrayList<String> list = new ArrayList<>();
 
-        if(M<= n){
+        if(M< n){
 
             list.add(Integer.toString(M));
 
@@ -1492,25 +1508,31 @@ public class Crypto {
 
         }
 
-        int compteur= 0;
-        int borne_inf =0;
-        while(borne_inf != M_string.length()){
+        else {
 
-            M_string = M_string.substring(borne_inf , M_string.length() - compteur);
+            int borne_inf=0;
+            int borne_supp=M_string.length();
 
-            if(Integer.parseInt(M_string) < n){
+            while(borne_inf != borne_supp){
 
-                list.add(M_string);
-                borne_inf = M_string.length() - compteur;
-                compteur=0;
+                String nombre = M_string.substring(borne_inf , borne_supp);
+
+                if(Integer.parseInt(nombre) < n ){
+
+                    list.add(M_string.substring(borne_inf , borne_supp));
+
+                    borne_inf = borne_supp;
+                    borne_supp = M_string.length();
+
+                }
+
+                else {
+
+                    borne_supp--;
+                }
 
             }
 
-            else {
-
-                compteur++;
-
-            }
         }
 
         return list.toArray(new String[list.size()]);

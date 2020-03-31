@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     ListView listeViewSecu;
 
-    String[] listeSecu =  {"Atbash","César","Vigenère" , "Homophone" ,"Playfair", "Hill" , "Transposition Rectangulaire" , "DES" , "Surprise !"};
+    String[] listeSecu =  {"Atbash","César","Vigenère" , "Homophone" ,"Playfair", "Hill" , "Transposition Rectangulaire" , "DES" , "Surprise !" , "RSA"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

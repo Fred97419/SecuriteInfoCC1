@@ -27,6 +27,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
     EditText cle_hill_c;
     EditText cle_hill_d;
 
+    EditText P;
+    EditText Q;
+
     int chiffrementID;
     String chiffrementName;
 
@@ -52,6 +55,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
        cle_hill_c = findViewById(R.id.cle_hill_c);
        cle_hill_d = findViewById(R.id.cle_hill_d);
 
+       P = findViewById(R.id.P);
+       Q = findViewById(R.id.Q);
+
         chiffrementID = getIntent().getIntExtra("chiffrementType" , 0);
         chiffrementName = getIntent().getStringExtra("chiffrementName" );
 
@@ -75,9 +81,17 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         if(chiffrementID==5) cleEdit.setVisibility(View.INVISIBLE);
 
+        if(chiffrementID!=9){
+
+            Q.setVisibility(View.INVISIBLE);
+            P.setVisibility(View.INVISIBLE);
+        }
+
+        if(chiffrementID==9) cleEdit.setVisibility(View.INVISIBLE);
 
 
-        String[] test = Crypto.intToStringBloc(6882326 , 3337);
+
+        String[] test = Crypto.mToStringBloc(93858 , 3000);
 
         for (String bloc :test){
 
@@ -149,6 +163,22 @@ public class CryptoDefaultActivity extends AppCompatActivity {
                 case 8 :
                     if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.suprise(message , cle , chiffre));
                     break;
+
+                case 9 :
+                    String p = P.getText().toString();
+                    String q = Q.getText().toString();
+                    String M = message;
+
+                    if(!(p.isEmpty() || q.isEmpty() || M.isEmpty())){
+
+                        int p_int = Integer.parseInt(p);
+                        int q_int = Integer.parseInt(q);
+                        int M_int = Integer.parseInt(M);
+
+                        messageChiffreEdit.setText(Crypto.RSA(M_int , p_int , q_int , chiffre));
+
+                    }
+
             }
 
 
