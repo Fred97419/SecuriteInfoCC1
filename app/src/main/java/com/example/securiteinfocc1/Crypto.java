@@ -878,6 +878,10 @@ public class Crypto {
         BigInteger d_big = BigInteger.valueOf((long) d);
         BigInteger n_big = BigInteger.valueOf((long) n);
 
+        if(chiffre) Log.println(Log.ASSERT , "CHIFFRAGE" , "----------------------------");
+
+        if(!chiffre) Log.println(Log.ASSERT , "DECHIFFRAGE" , "----------------------------");
+
             for (int i=0 ; i<blocsM.length ; i++){
 
                 Log.println(Log.ASSERT , "Bloc n"+i , blocsM[i]);
