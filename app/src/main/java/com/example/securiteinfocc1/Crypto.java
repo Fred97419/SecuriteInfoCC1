@@ -6,6 +6,10 @@ import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +35,13 @@ public class Crypto {
         String resultat ="";
         int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
 
-            for (int i=0 ; i<message_int.length ; i++){
 
+            for (int i=0 ; i<message_int.length ; i++){
+               // Log.println(Log.ASSERT , "[Atbash] code avant N"+i , ""+message_int[i]);
 
                 message_int[i] = 255 - message_int[i];
 
-
+                Log.println(Log.ASSERT , "[Atbash] code apres N"+i , ""+message_int[i]);
             }
 
             resultat = ExtendedAscii.AsciiCodeTableToString(message_int);
@@ -61,15 +66,22 @@ public class Crypto {
         String resultat="";
         int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
 
+        if(chiffre) Log.println(Log.ASSERT , "CHIFFRAGE" , "--------------------");
+        if(!chiffre) Log.println(Log.ASSERT , "DECHIFFRAGE" , "--------------------");
+
         for (int i = 0 ; i< message_int.length ; i++){
 
             int numeroCarac = message_int[i];
 
+            Log.println(Log.ASSERT , "[Cesar] carac avant N"+i , Integer.toString(numeroCarac));
+
             if(chiffre) message_int[i] = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
-            Log.println(Log.ASSERT , "TEST CESAR" , Integer.toString(numeroCarac));
+
 
             if (!chiffre) message_int[i] = mod(numeroCarac-decalage , 256);
+
+            Log.println(Log.ASSERT , "[Cesar] carac après N"+i  , Integer.toString(message_int[i]));
 
 
         }
@@ -99,6 +111,8 @@ public class Crypto {
         int[] message_to_tabint = ExtendedAscii.StringToAsciiCodeTable(message);
         int[] cle_to_tabint = ExtendedAscii.StringToAsciiCodeTable(cle);
 
+        if(chiffre) Log.println(Log.ASSERT , "CHIFFRAGE" , "--------------------");
+        if(!chiffre) Log.println(Log.ASSERT , "DECHIFFRAGE" , "--------------------");
 
         for (int i = 0 ; i< message_to_tabint.length ; i++){
 
@@ -107,9 +121,14 @@ public class Crypto {
 
             int numeroCarac = message_to_tabint[i];
 
+            Log.println(Log.ASSERT , "[Vigenere] carac avant N"+i , Integer.toString(numeroCarac));
+            Log.println(Log.ASSERT , "[Vigenere] decalage N"+i , Integer.toString(decalage));
+
             if(chiffre) message_to_tabint[i] = (numeroCarac+decalage)%256; //evite de sortir de la table si le code ASCII est supérieur à 255
 
             if (!chiffre) message_to_tabint[i] = mod(numeroCarac-decalage , 256);
+
+            Log.println(Log.ASSERT , "[Vigenere] carac après N"+i , Integer.toString(message_to_tabint[i]));
 
 
         }
@@ -837,6 +856,7 @@ public class Crypto {
 
     public static String RSA (int M , int p , int q , boolean chiffre){
 
+
         String resultat ="";
 
 
@@ -1495,6 +1515,7 @@ public class Crypto {
 
 
     //------------------------------------[FONCTIONS INTERNES]--------------------------------------
+
 
 
     //Divise M en bloc

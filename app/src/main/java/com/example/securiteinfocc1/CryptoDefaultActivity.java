@@ -2,6 +2,7 @@ package com.example.securiteinfocc1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -88,16 +89,6 @@ public class CryptoDefaultActivity extends AppCompatActivity {
         }
 
         if(chiffrementID==9) cleEdit.setVisibility(View.INVISIBLE);
-
-
-
-        String[] test = Crypto.mToStringBloc(93858 , 3000);
-
-        for (String bloc :test){
-
-            Log.println(Log.ASSERT , "TEST" ,  bloc);
-
-        }
 
     }
 
