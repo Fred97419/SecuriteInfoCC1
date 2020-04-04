@@ -183,7 +183,12 @@ public class Crypto {
         String result ="";
 
         char[][] carrePolybe = cleToPolybe(cle);
+
+        showPolybe(carrePolybe);
+
         char[][] chiffrePlayfair = polybeToPlayfair(carrePolybe);
+
+        showPolybe(chiffrePlayfair);
 
 
 
@@ -364,9 +369,11 @@ public class Crypto {
         //det = a*d - b*c
         int det = (cle[0][0]*cle[1][1]) - (cle[0][1]*cle[1][0]);
 
+        if(det<0) det+=256;
+
         Log.println(Log.ASSERT , "PGCD DET" , Integer.toString(pgcd(det , 256)));
 
-        if(pgcd(det , 256) != 1){
+        if(pgcd(det , 256) != 1 ){
 
             resultat="Matrice de chiffrement incorrecte";
 
