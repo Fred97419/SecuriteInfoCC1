@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -31,10 +32,13 @@ public class CryptoDefaultActivity extends AppCompatActivity {
     EditText P;
     EditText Q;
 
+    CheckBox hexaCheck;
+
     int chiffrementID;
     String chiffrementName;
 
     boolean chiffre = true;
+    boolean hexa = false;
 
 
 
@@ -58,6 +62,8 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
        P = findViewById(R.id.P);
        Q = findViewById(R.id.Q);
+
+       hexaCheck = findViewById(R.id.hexa);
 
         chiffrementID = getIntent().getIntExtra("chiffrementType" , 0);
         chiffrementName = getIntent().getStringExtra("chiffrementName" );
@@ -89,6 +95,9 @@ public class CryptoDefaultActivity extends AppCompatActivity {
         }
 
         if(chiffrementID==9) cleEdit.setVisibility(View.INVISIBLE);
+
+        if(chiffrementID==7) hexaCheck.setVisibility(View.VISIBLE);
+        if(chiffrementID!=7) hexaCheck.setVisibility(View.INVISIBLE);
 
     }
 
@@ -178,7 +187,11 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
         }
 
+    public void messageHexa(View v){
 
+        hexa = !hexa;
+
+    }
 
     public void chiffre(View v){
         chiffre = true;

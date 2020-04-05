@@ -659,6 +659,17 @@ public class Crypto {
     public static String DES(String message , String cle , boolean chiffre){
 
         //Si la clé fait plus de 64 bits ou que ce n'est pas un nombre hexadecimal
+
+        if(cle.contains("\\x")){
+
+            cle = cle.substring(2 , cle.length());
+        }
+
+        else {
+
+            return "Veuillez écrire la clé au format \\xYYYYYY";
+        }
+
         if( ! cleIsCorrect(cle)) return "Clé incorrecte ! ";
 
         String resultat="";
