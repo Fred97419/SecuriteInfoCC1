@@ -748,7 +748,7 @@ public class Crypto {
      *
      * Prend un message en texte, va effectuer une transposition des caractères avec une transposition
      * rectangulaire.
-     * Puis pour chaque caractère va les subsituer avec un élement de la table des émoticônes
+     * Puis pour chaque caractère va les subsituer avec un élement de la table des émoticônes avec un certain décalage
      *
      * @param message à chiffrer/déchiffrer
      * @param cle
@@ -764,6 +764,8 @@ public class Crypto {
         Emoji[] tab_emoji = emojitable.getEmojitable_simplified();
 
         String resultat="";
+
+        int[] message_to_int ;
 
         //Transposition
 
@@ -781,37 +783,23 @@ public class Crypto {
 
             String message_transpose = transpositionRectangulaire(message, cle, true);
 
-            String message_transpose_fix = message_transpose.replace("\0", "");
+            Log.println(Log.ASSERT, "MESSAGE TRANSP_fix", message_transpose);
 
-            Log.println(Log.ASSERT, "MESSAGE TRANSP_fix", message_transpose_fix);
+            message_to_int = ExtendedAscii.StringToAsciiCodeTable(message_transpose);
 
-            int[] tableau_code = new int[message.length()];
-
-            //remplis le tableau de code
-            for (int i = 0; i < message.length(); i++) {
-
-
-                int code_ascii = ExtendedAscii.getASCIICode(message_transpose_fix.charAt(i));
-
-
-                if (code_ascii != 0) tableau_code[i] = code_ascii;
-
-                Log.println(Log.ASSERT, "SUPRISE -> avant n" + i, Integer.toString(tableau_code[i]));
-
-            }
 
             //va transformer les code à l'aide de la clé
-            for (int i = 0; i < tableau_code.length; i++) {
+            for (int i = 0; i < message_to_int.length; i++) {
                 //décalage de (numero de la lettre dans le tableau + son code ascii)
 
 
-                tableau_code[i] += ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
+                message_to_int[i] += ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
 
-                tableau_code[i] = tableau_code[i] % tab_emoji.length;
+                message_to_int[i] = message_to_int[i] % tab_emoji.length;
 
-                Log.println(Log.ASSERT, "SUPRISE -> Tableau n" + i, Integer.toString(tableau_code[i]));
+                Log.println(Log.ASSERT, "SUPRISE -> Tableau n" + i, Integer.toString(message_to_int[i]));
 
-                resultat += tab_emoji[tableau_code[i]].getUnicode();
+                resultat += tab_emoji[message_to_int[i]].getUnicode();
 
             }
 
@@ -844,11 +832,9 @@ public class Crypto {
 
                 Log.println(Log.ASSERT, "EMOJI code APRES", Integer.toString(emojiTabCode[i]));
 
-                emojiToText+= ExtendedAscii.getChar(emojiTabCode[i],0);
-
             }
 
-            String emojiToTesxtfixed = emojiToText.replace("\0" , "");
+            String emojiToTesxtfixed = ExtendedAscii.AsciiCodeTableToString(emojiTabCode);
 
             resultat = transpositionRectangulaire(emojiToTesxtfixed , cle , false);
 
