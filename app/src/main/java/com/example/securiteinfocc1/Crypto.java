@@ -759,7 +759,7 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES]Bloc final permute" , Z);
 
 
-           if(!hexa) resultat+= bits64ToString(Z);
+           if(!hexa) resultat+= bits64ToString(Z).substring(1);
            if(hexa) resultat = bits64ToHexa(Z);
 
         }
@@ -855,7 +855,7 @@ public class Crypto {
             for (int i=0 ; i< emojiTab.length ; i++){
 
                 emojiTab[i]+=';';
-                emojiTabCode[i] = getEmojiNumber(emojiTab[i] , tab_emoji);
+                emojiTabCode[i] = emojitable.getEmojiNumber(emojiTab[i]);
 
                 Log.println(Log.ASSERT, "EMOJI code", Integer.toString(emojiTabCode[i]));
 
@@ -980,7 +980,7 @@ public class Crypto {
 
     }
 
-    public static String bits64ToHexa(String bloc){
+    private static String bits64ToHexa(String bloc){
 
         String bloc64=bloc;
 
@@ -1681,18 +1681,7 @@ public class Crypto {
 
     }
 
-    private static int getEmojiNumber(String emoji_html_hexa , Emoji[] tab){
 
-
-        for (int i=0 ; i<tab.length ; i++){
-
-            if(emoji_html_hexa.equals(tab[i].getHtmlHexadecimal())) return i;
-
-        }
-
-        return -1;
-
-    }
 
     /*Enleve les doublons*/
     private static  String deleteDoublons(String s) {

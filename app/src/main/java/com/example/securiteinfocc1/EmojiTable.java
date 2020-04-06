@@ -31,7 +31,18 @@ public class EmojiTable {
     public Emoji[] getEmojitable_simplified(){return  this.emojitable_simplified;}
 
 
-    public Emoji getEmoji(int i){return emojitable_simplified[i];}
+    public int getEmojiNumber(String emoji_html_hexa){
+
+
+        for (int i=0 ; i<this.emojitable_simplified.length ; i++){
+
+            if(emoji_html_hexa.equals(this.emojitable_simplified[i].getHtmlHexadecimal())) return i;
+
+        }
+
+        return -1;
+
+    }
 
 
 
