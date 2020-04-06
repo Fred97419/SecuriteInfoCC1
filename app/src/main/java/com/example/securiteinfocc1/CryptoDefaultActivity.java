@@ -156,7 +156,7 @@ public class CryptoDefaultActivity extends AppCompatActivity {
 
 
                 case 7 :
-                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.DES(message , cle , chiffre));
+                    if(!(cle.isEmpty())) messageChiffreEdit.setText(Crypto.DES(message , cle , chiffre , hexa));
                     break;
 
 

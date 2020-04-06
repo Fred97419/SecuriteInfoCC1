@@ -656,7 +656,7 @@ public class Crypto {
      * @param chiffre Vrai pour chiffrer, faux pour déchiffrer
      * @return
      */
-    public static String DES(String message , String cle , boolean chiffre){
+    public static String DES(String message , String cle , boolean chiffre , boolean hexa){
 
         //Si la clé fait plus de 64 bits ou que ce n'est pas un nombre hexadecimal
 
@@ -667,7 +667,7 @@ public class Crypto {
 
         else {
 
-            return "Veuillez écrire la clé au format \\xYYYYYY";
+            return "Veuillez écrire la clé au format \\xYYYYYY...";
         }
 
         if( ! cleIsCorrect(cle)) return "Clé incorrecte ! ";
@@ -678,8 +678,27 @@ public class Crypto {
         String[] tableau_D = new String[17];
 
         int[] message_int = ExtendedAscii.StringToAsciiCodeTable(message);
+        String[] blocs_message;
 
-        String[] blocs_message = messageToBloc(message_int);
+        if(!hexa)  blocs_message = messageToBloc(message_int);
+
+        else {
+
+            if( ! message.contains("\\x")){
+
+                return "Veuillez mettre le message sous forme hexadécimale  \\xYYYY...";
+            }
+
+            else {
+
+                blocs_message = new String[]{messageHexaTo64Bits(message.substring(2))};
+
+            }
+
+        }
+
+
+
 
         String cleK = hexaTo64Bits(cle);
 
@@ -740,14 +759,17 @@ public class Crypto {
             Log.println(Log.ASSERT , "[DES]Bloc final permute" , Z);
 
 
-            resultat+= bits64ToString(Z);
+           if(!hexa) resultat+= bits64ToString(Z);
+           if(hexa) resultat = bits64ToHexa(Z);
 
         }
 
 
 
 
-        return resultat ;
+
+
+        return resultat.replace("\\x00","");
 
     }
 
@@ -958,6 +980,30 @@ public class Crypto {
 
     }
 
+    public static String bits64ToHexa(String bloc){
+
+        String bloc64=bloc;
+
+        String result ="";
+
+        for (int i=0 ; i<16 ; i++){
+
+            String bits4 = bloc64.substring(4*i , 4*(i+1));
+
+            int intBits = Integer.parseInt(bits4 , 2);
+
+            String hexa = Integer.toHexString(intBits);
+
+            result+=hexa;
+
+        }
+
+
+        result = "`\\x"+result;
+        return result;
+
+    }
+
     //Fonction de confusion qui prendre un bloc de 32bits et une clé de 48 bits et renvoie un bloc de 32bits
     public static String fonctionConfusion(String bloc32 , String cleDiversifie){
 
@@ -1161,8 +1207,8 @@ public class Crypto {
                 {64,56,48,40,32,24,16,8},
                 {57,49,41,33,25,17,9,1},
                 {59,51,43,35,27,19,11,3},
-                {61,53,47,37,29,21,13,5},
-                {63,55,49,39,31,23,15,7}
+                {61,53,45,37,29,21,13,5},
+                {63,55,47,39,31,23,15,7}
         };
 
         for (int i=0 ; i<8 ; i++){
@@ -1489,7 +1535,54 @@ public class Crypto {
 
         result = zero_bits + result;
 
-        Log.println(Log.ASSERT , " [DES] Clé->(64bits) : ",result);
+        Log.println(Log.ASSERT , " [DES] Clé(64bits) ",result);
+        return result;
+
+    }
+
+    public static  String messageHexaTo64Bits(String hexa){
+
+        String result="" ;
+        int bits_préfixe;
+        String zero_bits="";
+
+        for (int i=0 ; i<hexa.length() ; i++){
+
+            zero_bits="";
+            int hex = Integer.parseInt( Character.toString(hexa.charAt(i)) , 16);
+
+            String hex_binary = Integer.toBinaryString(hex);
+
+
+
+            for (int j=0 ; j<4-hex_binary.length() ; j++){
+
+                zero_bits+='0';
+
+            }
+
+            hex_binary = zero_bits+hex_binary;
+            result += hex_binary;
+
+            Log.println(Log.ASSERT , "TEST HEX -> BINARY " , hexa.charAt(i)+"----->"+hex_binary);
+
+        }
+
+
+
+        zero_bits="";
+
+        bits_préfixe = 64 - result.length();
+
+        for (int i=0 ; i< bits_préfixe ; i++){
+
+            zero_bits+='0';
+
+        }
+
+        result = result+zero_bits;
+
+        Log.println(Log.ASSERT , " [DES] Message(64bits)",result);
         return result;
 
     }
