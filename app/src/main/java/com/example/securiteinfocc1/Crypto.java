@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -805,10 +806,13 @@ public class Crypto {
         int [] numero_cle = cleToNumeroAssocie(cle);
 
         //augmente tous les numéros de 1
-        for (int nombre : numero_cle){
+        for (int i=0 ; i<numero_cle.length ; i++){
 
-            nombre++;
-            Log.println(Log.ASSERT , "SUPRISE" , Integer.toString(nombre));
+            numero_cle[i]++;
+
+            Log.println(Log.ASSERT , "Numero ASSOCIE N"+i , ""+numero_cle[i]);
+
+
         }
 
 
@@ -825,8 +829,13 @@ public class Crypto {
             for (int i = 0; i < message_to_int.length; i++) {
                 //décalage de (numero de la lettre dans le tableau + son code ascii)
 
+                Log.println(Log.ASSERT, "SUPRISE -> Caractère n" + i, Integer.toString(message_to_int[i]));
 
-                message_to_int[i] += ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
+                int decalage = ((cle.length() * numero_cle[i % numero_cle.length]) * ExtendedAscii.getASCIICode(cle.charAt(i % cle.length())));
+
+                message_to_int[i] += decalage;
+
+                Log.println(Log.ASSERT , "DECALAGE DE " , ""+decalage);
 
                 message_to_int[i] = message_to_int[i] % tab_emoji.length;
 
@@ -879,7 +888,16 @@ public class Crypto {
         return resultat;
     }
 
-
+    /**
+     * Prend un entier M , calcule la clé publique (e,n) et la clé privée (d,n)
+     * Chiffre le message avec la clé publique ou le déchiffre avec la privée
+     *
+     * @param M le bloc à chiffrer
+     * @param p un nombre premier
+     * @param q un nombre premier
+     * @param chiffre vrai si on chiffre, faux si on déchiffre
+     * @return
+     */
     public static String RSA (int M , int p , int q , boolean chiffre){
 
 
@@ -1257,6 +1275,7 @@ public class Crypto {
 
     }
 
+    //Diversification des clés
     private static  String[] diversificationCle(String cle){
 
         String[] tableau_sous_cle = new String[17];
@@ -1367,7 +1386,7 @@ public class Crypto {
 
     }
 
-
+    //Rotation des bits vers la gauche
     private static  String rotateBitsLeft(String bits , int decal){
 
         String resultat = "";
@@ -1540,6 +1559,7 @@ public class Crypto {
 
     }
 
+    //Transforme un message hexadecimal en bloc de 64 bits
     public static  String messageHexaTo64Bits(String hexa){
 
         String result="" ;
@@ -1587,6 +1607,7 @@ public class Crypto {
 
     }
 
+    //transforme un int en String représentant 4 bits
     public static  String intTo4Bits(int n){
 
         String bits = Integer.toBinaryString(n);
@@ -1662,6 +1683,7 @@ public class Crypto {
 
     }
 
+    //transforme un ArrayList<Integer> en int[]
     private static int[] integerArrayListToIntArray(ArrayList<Integer> list){
 
         int [] result;
